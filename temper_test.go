@@ -76,3 +76,14 @@ func TestElement_HTMLPretty(t *testing.T) {
 		}, "\n"), root.HTMLPretty())
 	})
 }
+
+func TestEl(t *testing.T) {
+	t.Run("test component", func(t *testing.T) {
+		Btn := func() Element {
+			return Button().Class("btn btn--primary").Attr("type", "button")
+		}
+
+		root := Div().Children(Btn().Text("Click Me!"))
+		assert.Equal(t, `<div><button class="btn btn--primary" type="button">Click Me!</button></div>`, root.HTML())
+	})
+}
