@@ -41,14 +41,16 @@ func main() {
 	)
 
 	fmt.Println("HTML:\n\n", root.HTMLPretty())
-	
-	// <div>
-	//  <h1>Hello World!</h1>
-	//  <ul>
-	//    <li>Item 1</li>
-	//    <li>Item 2</li>
-	//  </ul>
-	//  <button class="btn">Click Me!</button>
-	//  </div>
 }
+```
+
+```html
+<div>
+  <h1>Hello World!</h1>
+  <ul>
+    <li>Item 1</li>
+    <li>Item 2</li>
+  </ul>
+  <button class="btn">Click Me!</button>
+</div>
 ```
