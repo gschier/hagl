@@ -13,13 +13,15 @@ func TestElement_HTML(t *testing.T) {
 	})
 
 	t.Run("generates nested elements", func(t *testing.T) {
-		root := El("div").Children(
-			El("ul").Children(
-				El("li").Text("Item 1"),
-				El("li").Text("Item 2"),
+		root := Div().Children(
+			H1().Text("Hello World!"),
+			Ul().Children(
+				Li().Text("Item 1"),
+				Li().Text("Item 2"),
 			),
+			Button().Class("btn").Text("Click Me!"),
 		)
-		assert.Equal(t, "<div><ul><li>Item 1</li><li>Item 2</li></ul></div>", root.HTML())
+		assert.Equal(t, "<div><ul><li>Item 1</li><li>Item 2</li></ul></div>", root.HTMLPretty())
 	})
 }
 

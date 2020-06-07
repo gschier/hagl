@@ -16,10 +16,59 @@ type Element interface {
 	Children(...Element) Element
 	Class(...string) Element
 	Attr(name, value string) Element
+	ID(id string) Element
 }
 
 func Div() Element {
 	return El("div")
+}
+
+func A() Element {
+	return El("a")
+}
+
+func Span() Element {
+	return El("span")
+}
+
+func H1() Element {
+	return El("h1")
+}
+
+func H2() Element {
+	return El("h2")
+}
+
+func H3() Element {
+	return El("h3")
+}
+
+func H4() Element {
+	return El("h4")
+}
+
+func H5() Element {
+	return El("h5")
+}
+
+func H6() Element {
+	return El("h6")
+}
+
+func P() Element {
+	return El("p")
+}
+
+func Pre() Element {
+	return El("pre")
+}
+
+func Button() Element {
+	return El("button")
+}
+
+func Form() Element {
+	return El("form")
 }
 
 func Ul() Element {
@@ -54,6 +103,10 @@ type element struct {
 	tag      string
 	text     string
 	classes  []string
+}
+
+func (e *element) ID(id string) Element {
+	return e.Attr("id", id)
 }
 
 func (e *element) Children(child ...Element) Element {
