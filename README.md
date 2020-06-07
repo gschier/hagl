@@ -22,26 +22,6 @@ func main() {
 
 	fmt.Println("HTML:\n\n", root.HTMLPretty())
 }
-
-package main
-
-import (
-	"fmt"
-	. "github.com/gschier/go-temper"
-)
-
-func main() {
-	root := Div().Children(
-		H1().Text("Hello World!"),
-		Ul().Children(
-			Li().Text("Item 1"),
-			Li().Text("Item 2"),
-		),
-		Button().Class("btn").Text("Click Me!"),
-	)
-
-	fmt.Println("HTML:\n\n", root.HTMLPretty())
-}
 ```
 
 ```html
