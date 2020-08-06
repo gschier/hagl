@@ -1,138 +1,101 @@
 package go_temper
 
 import (
-	"fmt"
 	"html"
 	"regexp"
 	"strings"
 )
 
-var multiWhitespaceRegexp = regexp.MustCompile("\n+")
-
-type Element interface {
-	HTML() string
-	HTMLPretty() string
-	Text(text string) Element
-	Children(...Element) Element
-	Class(...string) Element
-	Attr(name, value string) Element
-	ID(id string) Element
-}
-
-func Div() Element {
-	return El("div")
-}
-
-func A() Element {
-	return El("a")
-}
-
-func Span() Element {
-	return El("span")
-}
-
-func H1() Element {
-	return El("h1")
-}
-
-func H2() Element {
-	return El("h2")
-}
-
-func H3() Element {
-	return El("h3")
-}
-
-func H4() Element {
-	return El("h4")
-}
-
-func H5() Element {
-	return El("h5")
-}
-
-func H6() Element {
-	return El("h6")
-}
-
-func P() Element {
-	return El("p")
-}
-
-func Pre() Element {
-	return El("pre")
-}
-
-func Button() Element {
-	return El("button")
-}
-
-func Form() Element {
-	return El("form")
-}
-
-func Ul() Element {
-	return El("ul")
-}
-
-func Li() Element {
-	return El("li")
-}
-
-func El(tag string) Element {
-	return &element{
-		tag:      tag,
-		text:     "",
+func newEl() *Element {
+	return &Element{
 		children: make([]Element, 0),
-		attrs:    make([]*attr, 0),
+		attrs:    make([]attr, 0),
 	}
 }
 
-func Text(text string) Element {
-	return &element{text: text}
+func newTagEl(tag string) *Element {
+	el := newEl()
+	el.tag = tag
+	return el
+}
+
+func newSelfClosingEl(tag string) *Element {
+	el := newTagEl(tag)
+	el.selfClosing = true
+	return el
+}
+
+func newPreserveWhitespaceEl(tag string) *Element {
+	el := newTagEl(tag)
+	el.preserveWhitespace = true
+	return el
 }
 
 type attr struct {
-	n string
-	v string
+	name  string
+	value string
 }
 
-type element struct {
+type Element struct {
+	// children contains the child elements for the element
 	children []Element
-	attrs    []*attr
-	tag      string
-	text     string
-	classes  []string
+
+	// attrs contains the attributes for the element
+	attrs []attr
+
+	// classes hold the class names assigned to the element, which will
+	// be converted to attributes when rendered
+	classes []string
+
+	// tag defines the name of the HTML element
+	tag string
+
+	// text contains the text contents of the element
+	text string
+
+	// preserveWhitespace is used for tags like <pre> that shouldn't
+	// have the whitespace of their children changed in any way
+	preserveWhitespace bool
+
+	// selfClosing defines whether or not the element can close itself.
+	//
+	// For example, a horizontal rule or input can <hr/> <input/>
+	selfClosing bool
 }
 
-func (e *element) ID(id string) Element {
+func (e *Element) ID(id string) *Element {
 	return e.Attr("id", id)
 }
 
-func (e *element) Children(child ...Element) Element {
-	e.children = append(e.children, child...)
+func (e *Element) Children(child ...*Element) *Element {
+	for _, c := range child {
+		if e.preserveWhitespace {
+			c.preserveWhitespace = true
+		}
+		e.children = append(e.children, *c)
+	}
 	return e
 }
 
-func (e *element) Text(text string) Element {
-	e.children = []Element{Text(text)}
-	return e
+func (e *Element) Text(text string) *Element {
+	e.children = make([]Element, 0) // Clear existing
+	return e.Children(Text(text))
 }
 
-func (e *element) Attr(name, value string) Element {
+func (e *Element) Attr(name, value string) *Element {
 	for i, a := range e.attrs {
-		if a.n == name {
-			e.attrs[i] = &attr{n: name, v: value}
+		if a.name == name {
+			e.attrs[i] = attr{name: name, value: value}
 			return e
 		}
 	}
 
-	e.attrs = append(e.attrs, &attr{n: name, v: value})
+	e.attrs = append(e.attrs, attr{name: name, value: value})
 
 	return e
 }
 
-func (e *element) Class(cls ...string) Element {
+func (e *Element) Class(cls ...string) *Element {
 	existingClasses := strings.Fields(e.attr("class"))
 
 	for _, newCls := range cls {
@@ -154,37 +117,59 @@ func (e *element) Class(cls ...string) Element {
 	return e
 }
 
-func (e *element) HTML() string {
+func (e *Element) HTML() string {
 	return e.html(-1, "")
 }
 
-func (e *element) HTMLPretty() string {
+func (e *Element) HTMLPretty() string {
 	return strings.TrimSpace(e.html(0, "  "))
 }
 
-func (e *element) html(level int, tab string) string {
+var multiWhitespaceRegexp = regexp.MustCompile("\n+")
+
+func (e *Element) html(level int, tab string) string {
 	// It's a text tag, so format it and return
 	if e.isTextNode() {
-		return indent(level, multiWhitespaceRegexp.ReplaceAllString(e.text, " "), tab)
+		if e.preserveWhitespace {
+			return e.text
+		} else {
+			normalizedWhitespace := multiWhitespaceRegexp.ReplaceAllString(e.text, " ")
+			return indent(level, normalizedWhitespace, tab)
+		}
 	}
 
 	innerHTML := ""
-	for _, c := range e.children {
-		innerHTML += c.(*element).html(level+1, tab)
+
+	// It's a fragment, so just render out the children, indented
+	// at a lesser level
+	if e.isFragment() {
+		for _, c := range e.children {
+			innerHTML += indent(level-1, c.html(level, tab), tab)
+		}
+		return innerHTML
 	}
+
+	for _, c := range e.children {
+		if c.preserveWhitespace {
+			// Indent open tag but nothing else
+			innerHTML += indentN(level+1, c.HTML(), tab, 1)
+		} else {
+			innerHTML += c.html(level+1, tab)
+		}
+	}
+
+	// If it ends in a newline, remove it
 	if strings.HasSuffix(innerHTML, "\n") {
-		innerHTML = innerHTML[0 : len(innerHTML)-1]
+		innerHTML = strings.TrimSuffix(innerHTML, "\n")
 	}
 
 	attrsStr := e.attrsToString()
-
-	var tagStart string
-	var tagEnd = fmt.Sprintf("</%s>", e.tag)
-	if attrsStr != "" {
-		tagStart = fmt.Sprintf("<%s %s>", e.tag, attrsStr)
-	} else {
-		tagStart = fmt.Sprintf("<%s>", e.tag)
+	if e.selfClosing && innerHTML == "" {
+		return "<" + e.tag + attrsStr + "/>"
 	}
+
+	tagStart := "<" + e.tag + attrsStr + ">"
+	tagEnd := "</" + e.tag + ">"
 
 	// No indent so no pretty
 	if tab == "" {
@@ -192,44 +177,49 @@ func (e *element) html(level int, tab string) string {
 	}
 
 	// Short text contents, so put on one line
-	if e.onlyTextChildren() && len(tagStart)+len(innerHTML) < 60 {
+	if !e.preserveWhitespace && e.onlyTextChildren() && len(tagStart)+len(innerHTML) < 60 {
 		return indent(level, tagStart+strings.TrimSpace(innerHTML)+tagEnd, tab) + "\n"
 	}
 
-	h := indent(level, tagStart, tab) + "\n"
-	h += innerHTML + "\n"
-	h += indent(level, tagEnd, tab) + "\n"
-
-	return h
+	return indent(level, tagStart, tab) + "\n" +
+		innerHTML + "\n" +
+		indent(level, tagEnd, tab) + "\n"
 }
 
-func (e *element) isTextNode() bool {
-	return e.tag == ""
+func (e *Element) isTextNode() bool {
+	return e.tag == "" && len(e.children) == 0
 }
 
-func (e *element) onlyTextChildren() bool {
+func (e *Element) isFragment() bool {
+	return e.tag == "" && len(e.children) != 0
+}
+
+func (e *Element) onlyTextChildren() bool {
 	for _, c := range e.children {
-		if !c.(*element).isTextNode() {
+		if !c.isTextNode() {
 			return false
 		}
 	}
 	return true
 }
 
-func (e *element) attrsToString() string {
-	items := make([]string, 0)
+func (e *Element) attrsToString() string {
+	items := strings.Builder{}
 	for _, a := range e.attrs {
-		escaped := html.EscapeString(a.v)
-		items = append(items, fmt.Sprintf(`%s="%s"`, a.n, escaped))
+		escaped := html.EscapeString(a.value)
+		items.WriteString(" ")
+		items.WriteString(a.name)
+		items.WriteString("=\"")
+		items.WriteString(escaped)
+		items.WriteString("\"")
 	}
-
-	return strings.Join(items, " ")
+	return items.String()
 }
 
-func (e *element) attr(name string) string {
+func (e *Element) attr(name string) string {
 	for _, a := range e.attrs {
-		if a.n == name {
-			return a.v
+		if a.name == name {
+			return a.value
 		}
 	}
 
