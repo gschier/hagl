@@ -161,7 +161,8 @@ func (e *Node) html(level int, prettify bool) string {
 	innerHTML := ""
 	onlyTextChildren := true
 
-	for i, c := range e.children {
+	// Render children if the element has them
+	for _, c := range e.children {
 		if c.nodeType != textNode {
 			onlyTextChildren = false
 		}
@@ -174,10 +175,10 @@ func (e *Node) html(level int, prettify bool) string {
 			innerHTML += c.html(level+e.indentIncrement, prettify)
 		}
 
-		// Remove extra whitespace from last child so we don't get a
-		// blank line
-		if i == len(e.children)-1 {
-			innerHTML = strings.TrimSuffix(innerHTML, "\n")
+		// Add newline after each child if we're prettifying. Note, we don't
+		// add one to fragment children because they don't take up space
+		if prettify && !e.preformatted && c.nodeType != fragmentNode {
+			innerHTML += "\n"
 		}
 	}
 
@@ -215,13 +216,11 @@ func (e *Node) html(level int, prettify bool) string {
 	} else if e.preformatted || onlyTextChildren {
 		// Put the entire element on one line
 		prefix = e.indent(level, prefix)
-		suffix = suffix + "\n"
 		innerHTML = strings.TrimSpace(innerHTML)
 	} else {
 		// Indent, with start, content, end on separate lines
 		prefix = e.indent(level, prefix) + "\n"
-		suffix = e.indent(level, suffix) + "\n"
-		innerHTML += "\n"
+		suffix = e.indent(level, suffix)
 	}
 
 	return prefix + innerHTML + suffix

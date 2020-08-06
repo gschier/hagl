@@ -186,7 +186,7 @@ func TestFragment(t *testing.T) {
 				Div().Children(Span().Text("foo")),
 				Div(),
 				Fragment().Children(
-					H1(),
+					H1().Text("Hi"),
 					H2(),
 				),
 			),
@@ -197,31 +197,48 @@ func TestFragment(t *testing.T) {
 			"    <span>foo</span>",
 			"  </div>",
 			"  <div></div>",
-			"  <h1></h1>",
+			"  <h1>Hi</h1>",
 			"  <h2></h2>",
 			"</div>",
 		}, "\n"), root.HTMLPretty())
 	})
 }
 
-func BenchmarkHTML(b *testing.B) {
-	// run the Fib function b.N times
-	for n := 0; n < b.N; n++ {
-		root := Div().Children(
-			Fragment().Children(
-				Div().Children(
-					Span().Text("foo"),
-				),
-				Div().Children(
-					Ul().Children(
-						Li().Text("Item 1"),
-					),
-				),
-				Div().Attr("foo", "bar").Children(
-					Pre().Text("Hi, there."),
+func BenchmarkHTMLPretty(b *testing.B) {
+	root := Div().Children(
+		Fragment().Children(
+			Div().Class("foo", "bar", "baz").Children(
+				Span().Text("THis is a really long string of text and I think"+
+					" it makes for a good test. Here are some random characters."+
+					" eeeeeeeeeeeeeeeeeeeeeeeeeeeeee fffffffffffffffffffffffffff"+
+					" eeeeeeeeeeeeeeeeeeeeeeeeeeeeee fffffffffffffffffffffffffff"+
+					" eeeeeeeeeeeeeeeeeeeeeeeeeeeeee fffffffffffffffffffffffffff"+
+					" eeeeeeeeeeeeeeeeeeeeeeeeeeeeee fffffffffffffffffffffffffff"+
+					""),
+			),
+			Div().ID("woo!").Attr("foo", "bar").Attr("baz", "qux").Attr("hi", "there").Children(
+				Ul().Children(
+					Li().Text("Item 1"),
 				),
 			),
-		)
+			Div().Attr("foo", "bar").Children(
+				Pre().Text("Hi, there."),
+				Div().Text("Hi, there."),
+				Span().Text("Hi, there."),
+				Span().Text("Hi, there."),
+				Span().Text("Hi, there."),
+				Span().Text("Hi, there."),
+				Span().Text("Hi, there."),
+				Span().Text("Hi, there."),
+				Span().Text("Hi, there."),
+				Span().Text("Hi, there."),
+				Span().Text("Hi, there."),
+				Span().Text("Hi, there."),
+				Span().Text("Hi, there."),
+			),
+		),
+	)
+	for n := 0; n < b.N; n++ {
 		root.HTMLPretty()
 	}
 }
