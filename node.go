@@ -11,8 +11,6 @@ var multiWhitespaceRegexp = regexp.MustCompile("\n+")
 func newEl() *Node {
 	return &Node{
 		nodeType:        elementNode,
-		children:        make([]Node, 0),
-		attrs:           make([]attr, 0),
 		tab:             "  ",
 		indentIncrement: 1,
 	}
@@ -101,16 +99,8 @@ func (e *Node) Children(child ...*Node) *Node {
 	return e
 }
 
+// Text is a helper method to add a text node to children
 func (e *Node) Text(text string) *Node {
-	e.children = make([]Node, 0) // Clear existing
-
-	if !e.preformatted {
-		// Replace newlines and multiple spaces with a single space, since
-		// HTML treats them all the same anyway.
-		// TODO: Figure out exact behavior for this
-		text = multiWhitespaceRegexp.ReplaceAllString(text, " ")
-	}
-
 	return e.Children(Text(text))
 }
 
@@ -197,8 +187,12 @@ func (e *Node) html(level int, prettify bool) string {
 		suffix   = ""
 	)
 
-	if e.nodeType == textNode {
+	if e.nodeType == textNode && e.preformatted {
+		// Leave pre-formatted text nodes alone
 		innerHTML = e.text
+	} else if e.nodeType == textNode {
+		// Replace multiple whitespace with single space for text nodes
+		innerHTML = multiWhitespaceRegexp.ReplaceAllString(e.text, " ")
 	} else if e.nodeType == fragmentNode {
 		// No prefix/suffix for fragments
 	} else if e.nodeType == commentNode {
