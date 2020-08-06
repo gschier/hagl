@@ -13,6 +13,7 @@ func newEl() *Node {
 		nodeType: elementNode,
 		children: make([]Node, 0),
 		attrs:    make([]attr, 0),
+		indent:   1,
 	}
 }
 
@@ -76,6 +77,10 @@ type Node struct {
 	//
 	// For example, a horizontal rule or input can <hr/> <input/>
 	selfClosing bool
+
+	// indent specifies the amount of indents the element should add. This
+	// is most useful for Fragment, which has no indent.
+	indent int
 }
 
 func (e *Node) ID(id string) *Node {
@@ -150,42 +155,44 @@ func (e *Node) HTMLPretty() string {
 
 func (e *Node) html(level int, tab string, prettify bool) string {
 	innerHTML := ""
+	onlyTextChildren := true
 
-	if e.nodeType == fragmentNode {
-		level--
-	}
+	for i, c := range e.children {
+		if c.nodeType != textNode {
+			onlyTextChildren = false
+		}
 
-	for _, c := range e.children {
-		if c.preformatted {
+		if e.preformatted {
 			// Indent open tag but nothing else
 			// TODO: Figure out what to do with tags inside <pre>
-			innerHTML += indentN(level+1, c.html(0, "", true), tab, 1)
+			innerHTML += indentN(0, c.html(0, "", false), tab, 1)
 		} else {
-			innerHTML += c.html(level+1, tab, prettify)
+			innerHTML += c.html(level+e.indent, tab, prettify)
+		}
+
+		// Remove extra whitespace from last child so we don't get a
+		// blank line
+		if i == len(e.children)-1 {
+			innerHTML = strings.TrimSuffix(innerHTML, "\n")
 		}
 	}
 
-	innerHTML = strings.TrimSuffix(innerHTML, "\n")
-
 	var (
 		attrsStr = e.attrsToString()
-		prefix   string
-		suffix   string
+		prefix   = ""
+		suffix   = ""
 	)
 
-	if e.selfClosing && innerHTML == "" {
-		prefix = "<" + e.tag + attrsStr
-		suffix = "/>"
-	} else if e.nodeType == textNode {
-		prefix = ""
-		suffix = ""
-		innerHTML = indent(level, e.text, tab) + "\n"
+	if e.nodeType == textNode {
+		innerHTML = e.text
+	} else if e.nodeType == fragmentNode {
+		// No prefix/suffix for fragments
 	} else if e.nodeType == commentNode {
 		prefix = "<!-- "
 		suffix = " -->"
-	} else if e.nodeType == fragmentNode {
-		prefix = ""
-		suffix = ""
+	} else if e.selfClosing && innerHTML == "" {
+		prefix = "<" + e.tag + attrsStr
+		suffix = "/>"
 	} else {
 		prefix = "<" + e.tag + attrsStr + ">"
 		suffix = "</" + e.tag + ">"
@@ -197,8 +204,8 @@ func (e *Node) html(level int, tab string, prettify bool) string {
 		// we're not prettifying, so leave as-is
 	} else if prefix == "" && suffix == "" {
 		// Not wrapping, so leave as is
-	} else if e.onlyTextChildren() && len(innerHTML) < 60 {
-		// Indent, but put everything on one line
+	} else if e.preformatted || onlyTextChildren {
+		// Put the entire element on one line
 		prefix = indent(level, prefix, tab)
 		suffix = suffix + "\n"
 		innerHTML = strings.TrimSpace(innerHTML)
@@ -210,15 +217,6 @@ func (e *Node) html(level int, tab string, prettify bool) string {
 	}
 
 	return prefix + innerHTML + suffix
-}
-
-func (e *Node) onlyTextChildren() bool {
-	for _, c := range e.children {
-		if c.nodeType != textNode {
-			return false
-		}
-	}
-	return true
 }
 
 func (e *Node) attrsToString() string {

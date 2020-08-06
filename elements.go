@@ -466,6 +466,7 @@ func Text(text string) *Node {
 func Fragment() *Node {
 	el := newEl()
 	el.nodeType = fragmentNode
+	el.indent = 0
 	return el
 }
 
