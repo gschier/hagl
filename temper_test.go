@@ -74,6 +74,12 @@ func TestElement_HTMLPretty(t *testing.T) {
 				Li().Text("This is a really long string that will get wrapped because it's too long."),
 			),
 			Pre().Text("function foo() {\n  return 'Hello World!';\n}"),
+			Pre().Children(
+				Div().Text("foo"),
+				Text("Bar"),
+				H2().Text("woo!"),
+				Comment("That was cool"),
+			),
 		)
 		assert.Equal(t, strings.Join([]string{
 			"<div>",
@@ -87,6 +93,12 @@ func TestElement_HTMLPretty(t *testing.T) {
 			"  <pre>function foo() {",
 			"  return 'Hello World!';",
 			"}</pre>",
+			"  <pre>",
+			"<div>foo</div>",
+			"Bar",
+			"<h2>woo!</h2>",
+			"<!-- That was cool -->",
+			"</pre>",
 			"</div>",
 		}, "\n"), root.HTMLPretty())
 	})
@@ -94,7 +106,7 @@ func TestElement_HTMLPretty(t *testing.T) {
 
 func TestEl(t *testing.T) {
 	t.Run("test component", func(t *testing.T) {
-		Btn := func() *Element {
+		Btn := func() *Node {
 			return Button().Class("btn btn--primary").Attr("type", "button")
 		}
 
@@ -112,6 +124,30 @@ func TestSelfClosingEl(t *testing.T) {
 	t.Run("works with children", func(t *testing.T) {
 		root := Hr().Class("red").Attr("type", "foo").Text("foo")
 		assert.Equal(t, `<hr class="red" type="foo">foo</hr>`, root.HTML())
+	})
+}
+
+func TestComment(t *testing.T) {
+	t.Run("basic example", func(t *testing.T) {
+		root := Comment("This is a comment")
+		assert.Equal(t, "<!-- This is a comment -->", root.HTML())
+	})
+
+	t.Run("complex example", func(t *testing.T) {
+		root := Div().Children(
+			Comment("This is in a div"),
+			Div().Children(
+				Comment("This is an awesome comment"),
+			),
+		)
+		assert.Equal(t, strings.Join([]string{
+			"<div>",
+			"  <!-- This is in a div -->",
+			"  <div>",
+			"    <!-- This is an awesome comment -->",
+			"  </div>",
+			"</div>",
+		}, "\n"), root.HTMLPretty())
 	})
 }
 
@@ -156,7 +192,10 @@ func TestFragment(t *testing.T) {
 			Fragment().Children(
 				Div().Children(Span().Text("foo")),
 				Div(),
-				Div(),
+				Fragment().Children(
+					H1(),
+					H2(),
+				),
 			),
 		)
 		assert.Equal(t, strings.Join([]string{
@@ -165,7 +204,8 @@ func TestFragment(t *testing.T) {
 			"    <span>foo</span>",
 			"  </div>",
 			"  <div></div>",
-			"  <div></div>",
+			"  <h1></h1>",
+			"  <h2></h2>",
 			"</div>",
 		}, "\n"), root.HTMLPretty())
 	})
