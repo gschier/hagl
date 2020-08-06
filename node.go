@@ -10,10 +10,11 @@ var multiWhitespaceRegexp = regexp.MustCompile("\n+")
 
 func newEl() *Node {
 	return &Node{
-		nodeType: elementNode,
-		children: make([]Node, 0),
-		attrs:    make([]attr, 0),
-		indent:   1,
+		nodeType:        elementNode,
+		children:        make([]Node, 0),
+		attrs:           make([]attr, 0),
+		tab:             "  ",
+		indentIncrement: 1,
 	}
 }
 
@@ -78,9 +79,12 @@ type Node struct {
 	// For example, a horizontal rule or input can <hr/> <input/>
 	selfClosing bool
 
-	// indent specifies the amount of indents the element should add. This
-	// is most useful for Fragment, which has no indent.
-	indent int
+	// indentIncrement specifies the amount of indents the element should add.
+	// This is most useful for Fragment, which has no indent.
+	indentIncrement int
+
+	// tab specifies the character used to indent
+	tab string
 }
 
 func (e *Node) ID(id string) *Node {
@@ -146,14 +150,24 @@ func (e *Node) Class(cls ...string) *Node {
 }
 
 func (e *Node) HTML() string {
-	return e.html(-1, "", false)
+	return e.html(-1, false)
 }
 
 func (e *Node) HTMLPretty() string {
-	return strings.TrimSpace(e.html(0, "  ", true))
+	return strings.TrimSpace(e.html(0, true))
 }
 
-func (e *Node) html(level int, tab string, prettify bool) string {
+func (e *Node) indent(level int, text string) string {
+	prefix := strings.Builder{}
+	for i := 0; i < level; i++ {
+		prefix.WriteString(e.tab)
+	}
+
+	prefix.WriteString(text)
+	return prefix.String()
+}
+
+func (e *Node) html(level int, prettify bool) string {
 	innerHTML := ""
 	onlyTextChildren := true
 
@@ -165,9 +179,9 @@ func (e *Node) html(level int, tab string, prettify bool) string {
 		if e.preformatted {
 			// Indent open tag but nothing else
 			// TODO: Figure out what to do with tags inside <pre>
-			innerHTML += indentN(0, c.html(0, "", false), tab, 1)
+			innerHTML += e.indent(0, c.html(0, false))
 		} else {
-			innerHTML += c.html(level+e.indent, tab, prettify)
+			innerHTML += c.html(level+e.indentIncrement, prettify)
 		}
 
 		// Remove extra whitespace from last child so we don't get a
@@ -206,13 +220,13 @@ func (e *Node) html(level int, tab string, prettify bool) string {
 		// Not wrapping, so leave as is
 	} else if e.preformatted || onlyTextChildren {
 		// Put the entire element on one line
-		prefix = indent(level, prefix, tab)
+		prefix = e.indent(level, prefix)
 		suffix = suffix + "\n"
 		innerHTML = strings.TrimSpace(innerHTML)
 	} else {
 		// Indent, with start, content, end on separate lines
-		prefix = indent(level, prefix, tab) + "\n"
-		suffix = indent(level, suffix, tab) + "\n"
+		prefix = e.indent(level, prefix) + "\n"
+		suffix = e.indent(level, suffix) + "\n"
 		innerHTML += "\n"
 	}
 
