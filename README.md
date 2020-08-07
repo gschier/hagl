@@ -1,6 +1,6 @@
 # HAGL (HTML Abstraction Go Library)
 
-HTML templating in Go
+HTML templating in Go, inspired by [Elm](https://elm-lang.org) and [HAML](https://haml.info).
 
 ```go
 package main
