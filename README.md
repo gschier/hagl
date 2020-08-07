@@ -1,4 +1,4 @@
-# go-temper
+# HAGL (HTML Abstraction Go Library)
 
 HTML templating in Go
 
@@ -6,31 +6,51 @@ HTML templating in Go
 package main
 
 import (
-	"fmt"
-	. "github.com/gschier/go-temper"
+    . "github.com/gschier/hagl"
 )
 
 func main() {
-	root := Div().Children(
-		H1().Text("Hello World!"),
-		Ul().Children(
-			Li().Text("Item 1"),
-			Li().Text("Item 2"),
-		),
-		Button().Class("btn").Text("Click Me!"),
-	)
+    loggedIn := true
 
-	fmt.Println("HTML:\n\n", root.HTMLPretty())
+    header := func() Node {
+        return H1().Text("Hello World!")
+    }
+
+    root := Div().Children(
+        // Comments
+        Comment("This is a simple example"),
+
+        // Composable elements
+        header().Class("hero"),
+
+        // Looping
+        Ul().Range(3, func(i int) Node {
+            return Li().Textf("Item %d", i)
+        }),
+
+        // Conditional rendering
+        Switch(loggedIn).
+            Case(true, func() Node {
+                return A().Attr("href", "/logout").Text("Logout")
+            }).
+            Default(func() Node {
+                return A().Attr("href", "/login").Text("Log In")
+            }),
+    )
+
+    println(root.HTMLPretty())
 }
 ```
 
 ```html
 <div>
-  <h1>Hello World!</h1>
+  <!-- This is a simple example -->
+  <h1 class="hero">Hello World!</h1>
   <ul>
+    <li>Item 0</li>
     <li>Item 1</li>
     <li>Item 2</li>
   </ul>
-  <button class="btn">Click Me!</button>
+  <a href="/logout">Logout</a>
 </div>
 ```

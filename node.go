@@ -1,35 +1,38 @@
-package go_temper
+package hagl
 
 import (
+	"fmt"
 	"html"
+	"io"
 	"regexp"
 	"strings"
 )
 
 var multiWhitespaceRegexp = regexp.MustCompile("\n+")
 
-func newEl() *Node {
-	return &Node{
-		nodeType:        elementNode,
+func newEl() *RawNode {
+	return &RawNode{
+		nodeType:        tagNode,
+		styles:          make(map[string]string),
 		tab:             "  ",
 		indentIncrement: 1,
 	}
 }
 
-func newTagEl(tag string) *Node {
+func newTagNode(tag string) *RawNode {
 	el := newEl()
 	el.tag = tag
 	return el
 }
 
-func newSelfClosingEl(tag string) *Node {
-	el := newTagEl(tag)
+func newSelfClosingTagNode(tag string) *RawNode {
+	el := newTagNode(tag)
 	el.selfClosing = true
 	return el
 }
 
-func newPreserveWhitespaceEl(tag string) *Node {
-	el := newTagEl(tag)
+func newPreserveWhitespaceTagNode(tag string) *RawNode {
+	el := newTagNode(tag)
 	el.preformatted = true
 	return el
 }
@@ -43,12 +46,29 @@ type nodeType int
 
 const (
 	textNode nodeType = iota
-	elementNode
+	tagNode
 	commentNode
 	fragmentNode
 )
 
-type Node struct {
+type Node interface {
+	ID(id string) Node
+	Children(child ...Node) Node
+	Range(n int, child func(i int) Node) Node
+	Text(text string) Node
+	Textf(format string, a ...interface{}) Node
+	Attr(name, value string) Node
+	Class(cls ...string) Node
+	Style(name, value string) Node
+	HTML() string
+	HTMLPretty() string
+	Write(w io.Writer) (int, error)
+
+	// GetNode returns the root node. This is for internal use only
+	GetNode() *RawNode
+}
+
+type RawNode struct {
 	// children contains the child elements for the element
 	children []Node
 
@@ -58,6 +78,10 @@ type Node struct {
 	// classes hold the class names assigned to the element, which will
 	// be converted to attributes when rendered
 	classes []string
+
+	// styles hold the styles assigned to the element, which will
+	// be converted to attributes when rendered
+	styles map[string]string
 
 	// tag defines the name of the HTML element
 	tag string
@@ -85,26 +109,48 @@ type Node struct {
 	tab string
 }
 
-func (e *Node) ID(id string) *Node {
+func (e *RawNode) ID(id string) Node {
 	return e.Attr("id", id)
 }
 
-func (e *Node) Children(child ...*Node) *Node {
+func (e *RawNode) GetNode() *RawNode {
+	return e
+}
+
+func (e *RawNode) Children(child ...Node) Node {
 	for _, c := range child {
-		if e.preformatted {
-			c.preformatted = true
+		// Skip nil Nodes
+		if c == nil {
+			continue
 		}
-		e.children = append(e.children, *c)
+
+		// Preformatted nodes have preformatted children
+		if e.preformatted {
+			c.GetNode().preformatted = true
+		}
+
+		e.children = append(e.children, c)
 	}
 	return e
 }
 
+// Range is a convenience used to generate n children based on a factory function.
+// the factory will be called n times and will skip any nil children
+func (e *RawNode) Range(n int, child func(i int) Node) Node {
+	return e.Children(FragmentRange(n, child))
+}
+
 // Text is a helper method to add a text node to children
-func (e *Node) Text(text string) *Node {
+func (e *RawNode) Text(text string) Node {
 	return e.Children(Text(text))
 }
 
-func (e *Node) Attr(name, value string) *Node {
+// Textf is the same as Text, but accepts fmt args
+func (e *RawNode) Textf(format string, a ...interface{}) Node {
+	return e.Children(Text(fmt.Sprintf(format, a...)))
+}
+
+func (e *RawNode) Attr(name, value string) Node {
 	for i, a := range e.attrs {
 		if a.name == name {
 			e.attrs[i] = attr{name: name, value: value}
@@ -117,7 +163,7 @@ func (e *Node) Attr(name, value string) *Node {
 	return e
 }
 
-func (e *Node) Class(cls ...string) *Node {
+func (e *RawNode) Class(cls ...string) Node {
 	existingClasses := strings.Fields(e.attr("class"))
 
 	for _, newCls := range cls {
@@ -135,19 +181,38 @@ func (e *Node) Class(cls ...string) *Node {
 	}
 
 	e.Attr("class", strings.Join(existingClasses, " "))
-
 	return e
 }
 
-func (e *Node) HTML() string {
+// Style is a utility method to append to the style attribute. If a style
+// attribute already exists, the new style will be appended.
+func (e *RawNode) Style(name, value string) Node {
+	str := name + ":" + value
+	for i, a := range e.attrs {
+		if a.name == "style" {
+			e.attrs[i].value += ";" + str
+			return e
+		}
+	}
+
+	// No style attr, so add one
+	e.Attr("style", str)
+	return e
+}
+
+func (e *RawNode) HTML() string {
 	return e.html(-1, false)
 }
 
-func (e *Node) HTMLPretty() string {
+func (e *RawNode) HTMLPretty() string {
 	return strings.TrimSpace(e.html(0, true))
 }
 
-func (e *Node) indent(level int, text string) string {
+func (e *RawNode) Write(w io.Writer) (int, error) {
+	return w.Write([]byte(e.HTML()))
+}
+
+func (e *RawNode) indent(level int, text string) string {
 	prefix := strings.Builder{}
 	for i := 0; i < level; i++ {
 		prefix.WriteString(e.tab)
@@ -157,27 +222,27 @@ func (e *Node) indent(level int, text string) string {
 	return prefix.String()
 }
 
-func (e *Node) html(level int, prettify bool) string {
+func (e *RawNode) html(level int, prettify bool) string {
 	innerHTML := ""
 	onlyTextChildren := true
 
 	// Render children if the element has them
 	for _, c := range e.children {
-		if c.nodeType != textNode {
+		if c.GetNode().nodeType != textNode {
 			onlyTextChildren = false
 		}
 
 		if e.preformatted {
 			// Indent open tag but nothing else
 			// TODO: Figure out what to do with tags inside <pre>
-			innerHTML += e.indent(0, c.html(0, false))
+			innerHTML += e.indent(0, c.GetNode().html(0, false))
 		} else {
-			innerHTML += c.html(level+e.indentIncrement, prettify)
+			innerHTML += c.GetNode().html(level+e.indentIncrement, prettify)
 		}
 
 		// Add newline after each child if we're prettifying. Note, we don't
 		// add one to fragment children because they don't take up space
-		if prettify && !e.preformatted && c.nodeType != fragmentNode {
+		if prettify && !e.preformatted && c.GetNode().nodeType != fragmentNode {
 			innerHTML += "\n"
 		}
 	}
@@ -226,7 +291,7 @@ func (e *Node) html(level int, prettify bool) string {
 	return prefix + innerHTML + suffix
 }
 
-func (e *Node) attrsToString() string {
+func (e *RawNode) attrsToString() string {
 	items := strings.Builder{}
 	for _, a := range e.attrs {
 		escaped := html.EscapeString(a.value)
@@ -239,12 +304,11 @@ func (e *Node) attrsToString() string {
 	return items.String()
 }
 
-func (e *Node) attr(name string) string {
+func (e *RawNode) attr(name string) string {
 	for _, a := range e.attrs {
 		if a.name == name {
 			return a.value
 		}
 	}
-
 	return ""
 }

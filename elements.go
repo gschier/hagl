@@ -1,460 +1,464 @@
-package go_temper
+package hagl
 
 // Elements copied from Elm's HTML package:
 //   https://package.elm-lang.org/packages/elm/html/latest/Html
 
 // Document
 
-func Html() *Node {
-	return newTagEl("html")
+func Html() Node {
+	return newTagNode("html")
 }
 
-func Head() *Node {
-	return newTagEl("head")
+func Head() Node {
+	return newTagNode("head")
 }
 
-func Body() *Node {
-	return newTagEl("body")
+func Title() Node {
+	return newTagNode("title")
 }
 
-func Base() *Node {
-	return newSelfClosingEl("base")
+func Body() Node {
+	return newTagNode("body")
 }
 
-func Link() *Node {
-	return newSelfClosingEl("link")
+func Base() Node {
+	return newSelfClosingTagNode("base")
 }
 
-func Meta() *Node {
-	return newSelfClosingEl("meta")
+func Link() Node {
+	return newSelfClosingTagNode("link")
 }
 
-func Script() *Node {
-	return newTagEl("link")
+func Meta() Node {
+	return newSelfClosingTagNode("meta")
 }
 
-func Style() *Node {
-	return newTagEl("style")
+func Script() Node {
+	return newTagNode("link")
+}
+
+func Style() Node {
+	return newTagNode("style")
 }
 
 // Headers
 
-func H1() *Node {
-	return newTagEl("h1")
+func H1() Node {
+	return newTagNode("h1")
 }
 
-func H2() *Node {
-	return newTagEl("h2")
+func H2() Node {
+	return newTagNode("h2")
 }
 
-func H3() *Node {
-	return newTagEl("h3")
+func H3() Node {
+	return newTagNode("h3")
 }
 
-func H4() *Node {
-	return newTagEl("h4")
+func H4() Node {
+	return newTagNode("h4")
 }
 
-func H5() *Node {
-	return newTagEl("h5")
+func H5() Node {
+	return newTagNode("h5")
 }
 
-func H6() *Node {
-	return newTagEl("h6")
+func H6() Node {
+	return newTagNode("h6")
 }
 
 // Grouping Content
 
-func Div() *Node {
-	return newTagEl("div")
+func Div() Node {
+	return newTagNode("div")
 }
 
-func P() *Node {
-	return newTagEl("p")
+func P() Node {
+	return newTagNode("p")
 }
 
-func Hr() *Node {
-	return newSelfClosingEl("hr")
+func Hr() Node {
+	return newSelfClosingTagNode("hr")
 }
 
-func Pre() *Node {
-	return newPreserveWhitespaceEl("pre")
+func Pre() Node {
+	return newPreserveWhitespaceTagNode("pre")
 }
 
-func Blockquote() *Node {
-	return newTagEl("blockquote")
+func Blockquote() Node {
+	return newTagNode("blockquote")
 }
 
 // Text
 
-func Span() *Node {
-	return newTagEl("span")
+func Span() Node {
+	return newTagNode("span")
 }
 
-func A() *Node {
-	return newTagEl("a")
+func A() Node {
+	return newTagNode("a")
 }
 
-func Code() *Node {
-	return newTagEl("code")
+func Code() Node {
+	return newTagNode("code")
 }
 
-func Em() *Node {
-	return newTagEl("em")
+func Em() Node {
+	return newTagNode("em")
 }
 
-func Strong() *Node {
-	return newTagEl("em")
+func Strong() Node {
+	return newTagNode("em")
 }
 
-func I() *Node {
-	return newTagEl("i")
+func I() Node {
+	return newTagNode("i")
 }
 
-func B() *Node {
-	return newTagEl("b")
+func B() Node {
+	return newTagNode("b")
 }
 
-func U() *Node {
-	return newTagEl("u")
+func U() Node {
+	return newTagNode("u")
 }
 
-func Sub() *Node {
-	return newTagEl("sub")
+func Sub() Node {
+	return newTagNode("sub")
 }
 
-func Sup() *Node {
-	return newTagEl("sup")
+func Sup() Node {
+	return newTagNode("sup")
 }
 
-func Br() *Node {
-	return newSelfClosingEl("br")
+func Br() Node {
+	return newSelfClosingTagNode("br")
 }
 
 // Lists
 
-func Ol() *Node {
-	return newTagEl("ol")
+func Ol() Node {
+	return newTagNode("ol")
 }
 
-func Ul() *Node {
-	return newTagEl("ul")
+func Ul() Node {
+	return newTagNode("ul")
 }
 
-func Li() *Node {
-	return newTagEl("li")
+func Li() Node {
+	return newTagNode("li")
 }
 
-func Dl() *Node {
-	return newTagEl("dl")
+func Dl() Node {
+	return newTagNode("dl")
 }
 
-func Dt() *Node {
-	return newTagEl("dt")
+func Dt() Node {
+	return newTagNode("dt")
 }
 
-func Dd() *Node {
-	return newTagEl("dd")
+func Dd() Node {
+	return newTagNode("dd")
 }
 
 // Embedded Content
 
-func Img() *Node {
-	return newSelfClosingEl("img")
+func Img() Node {
+	return newSelfClosingTagNode("img")
 }
 
-func IFrame() *Node {
-	return newTagEl("iframe")
+func IFrame() Node {
+	return newTagNode("iframe")
 }
 
-func Canvas() *Node {
-	return newTagEl("canvas")
+func Canvas() Node {
+	return newTagNode("canvas")
 }
 
-func Math() *Node {
-	return newTagEl("math")
+func Math() Node {
+	return newTagNode("math")
 }
 
 // Inputs
 
-func Form() *Node {
-	return newTagEl("form")
+func Form() Node {
+	return newTagNode("form")
 }
 
-func Input() *Node {
-	return newSelfClosingEl("input")
+func Input() Node {
+	return newSelfClosingTagNode("input")
 }
 
-func Textarea() *Node {
-	return newSelfClosingEl("textarea")
+func Textarea() Node {
+	return newSelfClosingTagNode("textarea")
 }
 
-func Button() *Node {
-	return newTagEl("button")
+func Button() Node {
+	return newTagNode("button")
 }
 
-func Select() *Node {
-	return newTagEl("select")
+func Select() Node {
+	return newTagNode("select")
 }
 
-func Option() *Node {
-	return newTagEl("option")
+func Option() Node {
+	return newTagNode("option")
 }
 
-func Fieldset() *Node {
-	return newTagEl("fieldset")
+func Fieldset() Node {
+	return newTagNode("fieldset")
 }
 
-func Legend() *Node {
-	return newTagEl("legend")
+func Legend() Node {
+	return newTagNode("legend")
 }
 
-func Label() *Node {
-	return newTagEl("label")
+func Label() Node {
+	return newTagNode("label")
 }
 
-func Datalist() *Node {
-	return newTagEl("datalist")
+func Datalist() Node {
+	return newTagNode("datalist")
 }
 
-func Optgroup() *Node {
-	return newTagEl("optgroup")
+func Optgroup() Node {
+	return newTagNode("optgroup")
 }
 
-func Output() *Node {
-	return newTagEl("output")
+func Output() Node {
+	return newTagNode("output")
 }
 
-func Progress() *Node {
-	return newTagEl("progress")
+func Progress() Node {
+	return newTagNode("progress")
 }
 
-func Meter() *Node {
-	return newTagEl("meter")
+func Meter() Node {
+	return newTagNode("meter")
 }
 
 // Sections
 
-func Section() *Node {
-	return newTagEl("section")
+func Section() Node {
+	return newTagNode("section")
 }
 
-func Nav() *Node {
-	return newTagEl("nav")
+func Nav() Node {
+	return newTagNode("nav")
 }
 
-func Article() *Node {
-	return newTagEl("article")
+func Article() Node {
+	return newTagNode("article")
 }
 
-func Aside() *Node {
-	return newTagEl("aside")
+func Aside() Node {
+	return newTagNode("aside")
 }
 
-func Header() *Node {
-	return newTagEl("header")
+func Header() Node {
+	return newTagNode("header")
 }
 
-func Footer() *Node {
-	return newTagEl("footer")
+func Footer() Node {
+	return newTagNode("footer")
 }
 
-func Address() *Node {
-	return newTagEl("address")
+func Address() Node {
+	return newTagNode("address")
 }
 
-func Main() *Node {
-	return newTagEl("main")
+func Main() Node {
+	return newTagNode("main")
 }
 
 // Figures
 
-func Figure() *Node {
-	return newTagEl("figure")
+func Figure() Node {
+	return newTagNode("figure")
 }
 
-func Figcaption() *Node {
-	return newTagEl("figcaption")
+func Figcaption() Node {
+	return newTagNode("figcaption")
 }
 
 // Tables
 
-func Table() *Node {
-	return newTagEl("table")
+func Table() Node {
+	return newTagNode("table")
 }
 
-func Caption() *Node {
-	return newTagEl("caption")
+func Caption() Node {
+	return newTagNode("caption")
 }
 
-func Colgroup() *Node {
-	return newTagEl("colgroup")
+func Colgroup() Node {
+	return newTagNode("colgroup")
 }
 
-func Col() *Node {
-	return newTagEl("col")
+func Col() Node {
+	return newTagNode("col")
 }
 
-func Tbody() *Node {
-	return newTagEl("tbody")
+func Tbody() Node {
+	return newTagNode("tbody")
 }
 
-func Thead() *Node {
-	return newTagEl("thead")
+func Thead() Node {
+	return newTagNode("thead")
 }
 
-func Tfoot() *Node {
-	return newTagEl("tfoot")
+func Tfoot() Node {
+	return newTagNode("tfoot")
 }
 
-func Tr() *Node {
-	return newTagEl("tr")
+func Tr() Node {
+	return newTagNode("tr")
 }
 
-func Td() *Node {
-	return newTagEl("td")
+func Td() Node {
+	return newTagNode("td")
 }
 
-func Th() *Node {
-	return newTagEl("th")
+func Th() Node {
+	return newTagNode("th")
 }
 
 // Audio/Video
 
-func Audio() *Node {
-	return newTagEl("audio")
+func Audio() Node {
+	return newTagNode("audio")
 }
 
-func Video() *Node {
-	return newTagEl("video")
+func Video() Node {
+	return newTagNode("video")
 }
 
-func Source() *Node {
-	return newTagEl("source")
+func Source() Node {
+	return newTagNode("source")
 }
 
-func Track() *Node {
-	return newSelfClosingEl("track")
+func Track() Node {
+	return newSelfClosingTagNode("track")
 }
 
 // Embedded Objects
 
-func Embed() *Node {
-	return newSelfClosingEl("embed")
+func Embed() Node {
+	return newSelfClosingTagNode("embed")
 }
 
-func Object() *Node {
-	return newTagEl("object")
+func Object() Node {
+	return newTagNode("object")
 }
 
-func Param() *Node {
-	return newSelfClosingEl("param")
+func Param() Node {
+	return newSelfClosingTagNode("param")
 }
 
 // Text Edits
 
-func Ins() *Node {
-	return newTagEl("ins")
+func Ins() Node {
+	return newTagNode("ins")
 }
 
-func Del() *Node {
-	return newTagEl("del")
+func Del() Node {
+	return newTagNode("del")
 }
 
 // Semantic Text
 
-func Small() *Node {
-	return newTagEl("small")
+func Small() Node {
+	return newTagNode("small")
 }
 
-func Cite() *Node {
-	return newTagEl("cite")
+func Cite() Node {
+	return newTagNode("cite")
 }
 
-func Dfn() *Node {
-	return newTagEl("dfn")
+func Dfn() Node {
+	return newTagNode("dfn")
 }
 
-func Abbr() *Node {
-	return newTagEl("abbr")
+func Abbr() Node {
+	return newTagNode("abbr")
 }
 
-func Time() *Node {
-	return newTagEl("time")
+func Time() Node {
+	return newTagNode("time")
 }
 
-func Var() *Node {
-	return newTagEl("var")
+func Var() Node {
+	return newTagNode("var")
 }
 
-func Samp() *Node {
-	return newTagEl("samp")
+func Samp() Node {
+	return newTagNode("samp")
 }
 
-func Kbd() *Node {
-	return newTagEl("kbd")
+func Kbd() Node {
+	return newTagNode("kbd")
 }
 
-func S() *Node {
-	return newTagEl("s")
+func S() Node {
+	return newTagNode("s")
 }
 
-func Q() *Node {
-	return newTagEl("q")
+func Q() Node {
+	return newTagNode("q")
 }
 
 // Less-common Text
 
-func Mark() *Node {
-	return newTagEl("mark")
+func Mark() Node {
+	return newTagNode("mark")
 }
 
-func Ruby() *Node {
-	return newTagEl("ruby")
+func Ruby() Node {
+	return newTagNode("ruby")
 }
 
-func Rt() *Node {
-	return newTagEl("rt")
+func Rt() Node {
+	return newTagNode("rt")
 }
 
-func Rp() *Node {
-	return newTagEl("rp")
+func Rp() Node {
+	return newTagNode("rp")
 }
 
-func Bdi() *Node {
-	return newTagEl("bdi")
+func Bdi() Node {
+	return newTagNode("bdi")
 }
 
-func Bdo() *Node {
-	return newTagEl("bdo")
+func Bdo() Node {
+	return newTagNode("bdo")
 }
 
-func Wbr() *Node {
-	return newSelfClosingEl("wbr")
+func Wbr() Node {
+	return newSelfClosingTagNode("wbr")
 }
 
 // Interactive Elements
 
-func Details() *Node {
-	return newTagEl("details")
+func Details() Node {
+	return newTagNode("details")
 }
 
-func Summary() *Node {
-	return newTagEl("summary")
+func Summary() Node {
+	return newTagNode("summary")
 }
 
-func Menuitem() *Node {
-	return newSelfClosingEl("menuitem")
+func Menuitem() Node {
+	return newSelfClosingTagNode("menuitem")
 }
 
-func Menu() *Node {
-	return newTagEl("menu")
+func Menu() Node {
+	return newTagNode("menu")
 }
 
 // Special
 
 // Text is special element that renders text
-func Text(text string) *Node {
+func Text(text string) Node {
 	el := newEl()
 	el.text = text
 	el.nodeType = textNode
@@ -463,14 +467,14 @@ func Text(text string) *Node {
 
 // Fragment is a special element that renders children without needing
 // a wrapper element.
-func Fragment() *Node {
+func Fragment() Node {
 	el := newEl()
 	el.nodeType = fragmentNode
 	el.indentIncrement = 0
 	return el
 }
 
-func Comment(text string) *Node {
+func Comment(text string) Node {
 	el := newEl()
 	el.Children(Text(text))
 	el.nodeType = commentNode
@@ -478,6 +482,6 @@ func Comment(text string) *Node {
 }
 
 // NewElement allows defining a custom element
-func NewElement(tag string) *Node {
-	return newTagEl(tag)
+func NewElement(tag string) Node {
+	return newTagNode(tag)
 }

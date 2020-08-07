@@ -1,4 +1,4 @@
-module github.com/gschier/go-temper
+module github.com/gschier/hagl
 
 go 1.14
 

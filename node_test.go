@@ -1,11 +1,11 @@
-package go_temper_test
+package hagl_test
 
 import (
-	"github.com/stretchr/testify/assert"
+	assert "github.com/stretchr/testify/require"
 	"strings"
 	"testing"
 
-	. "github.com/gschier/go-temper"
+	. "github.com/gschier/hagl"
 )
 
 func TestElement_HTML(t *testing.T) {
@@ -30,7 +30,7 @@ func TestElement_HTML(t *testing.T) {
 			"    <li>Item 1</li>",
 			"    <li>Item 2</li>",
 			"  </ul>",
-			`  <button class="btn">Click Me!</button>`,
+			"  <button class=\"btn\">Click Me!</button>",
 			"</div>",
 		}, "\n"), root.HTMLPretty())
 	})
@@ -65,7 +65,33 @@ func TestElement_Class(t *testing.T) {
 	})
 }
 
+func TestElement_Style(t *testing.T) {
+	t.Run("adds style", func(t *testing.T) {
+		root := Button().Style("background", "red")
+		assert.Equal(t, `<button style="background:red"></button>`, root.HTML())
+	})
+
+	t.Run("adds multiple styles", func(t *testing.T) {
+		root := Button().Style("background", "red").Style("color", "white")
+		assert.Equal(t, `<button style="background:red;color:white"></button>`, root.HTML())
+	})
+
+	t.Run("doesn't overwrite style", func(t *testing.T) {
+		root := Button().Style("background", "red").Style("background", "blue")
+		assert.Equal(t, `<button style="background:red;background:blue"></button>`, root.HTML())
+	})
+}
+
 func TestElement_HTMLPretty(t *testing.T) {
+	t.Run("pre", func(t *testing.T) {
+		root := Pre().Text("function foo() {\n  return 'Hello World!';\n}")
+		assert.Equal(t, strings.Join([]string{
+			"<pre>function foo() {",
+			"  return 'Hello World!';",
+			"}</pre>",
+		}, "\n"), root.HTMLPretty())
+	})
+
 	t.Run("pretty HTML", func(t *testing.T) {
 		root := Div().Children(
 			Ul().Children(
@@ -99,7 +125,7 @@ func TestElement_HTMLPretty(t *testing.T) {
 
 func TestEl(t *testing.T) {
 	t.Run("test component", func(t *testing.T) {
-		Btn := func() *Node {
+		Btn := func() Node {
 			return Button().Class("btn btn--primary").Attr("type", "button")
 		}
 
@@ -201,6 +227,20 @@ func TestFragment(t *testing.T) {
 			"  <h2></h2>",
 			"</div>",
 		}, "\n"), root.HTMLPretty())
+	})
+}
+
+func TestElement_Map(t *testing.T) {
+	t.Run("generates children and skips nil values", func(t *testing.T) {
+		items := []string{"foo", "bar", "baz"}
+		root := Ul().Range(len(items), func(i int) Node {
+			if items[i] == "bar" {
+				return nil
+			}
+			return Li().Text(items[i])
+		})
+
+		assert.Equal(t, `<ul><li>foo</li><li>baz</li></ul>`, root.HTML())
 	})
 }
 
