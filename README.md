@@ -1,7 +1,7 @@
 # HAGL
 
 HAGL (HTML Abstraction Go Library) is a Go library for rendering HTML, inspired 
-by [Elm](https://elm-lang.org).info).
+by [Elm](https://elm-lang.org).
 
 ## Example
 
