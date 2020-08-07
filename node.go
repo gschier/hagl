@@ -137,7 +137,10 @@ func (e *RawNode) Children(child ...Node) Node {
 // Range is a convenience used to generate n children based on a factory function.
 // the factory will be called n times and will skip any nil children
 func (e *RawNode) Range(n int, child func(i int) Node) Node {
-	return e.Children(FragmentRange(n, child))
+	for i := 0; i < n; i++ {
+		e.Children(child(i))
+	}
+	return e
 }
 
 // Text is a helper method to add a text node to children
