@@ -244,16 +244,16 @@ func TestElement_Map(t *testing.T) {
 	})
 }
 
+var result string
+
 func BenchmarkHTMLPretty(b *testing.B) {
 	root := Div().Children(
 		Fragment().Children(
 			Div().Class("foo", "bar", "baz").Children(
 				Span().Text("THis is a really long string of text and I think"+
 					" it makes for a good test. Here are some random characters."+
-					" eeeeeeeeeeeeeeeeeeeeeeeeeeeeee fffffffffffffffffffffffffff"+
-					" eeeeeeeeeeeeeeeeeeeeeeeeeeeeee fffffffffffffffffffffffffff"+
-					" eeeeeeeeeeeeeeeeeeeeeeeeeeeeee fffffffffffffffffffffffffff"+
-					" eeeeeeeeeeeeeeeeeeeeeeeeeeeeee fffffffffffffffffffffffffff"+
+					" it makes for a good test. Here are some random characters."+
+					" it makes for a good test. Here are some random characters."+
 					""),
 			),
 			Div().ID("woo!").Attr("foo", "bar").Attr("baz", "qux").Attr("hi", "there").Children(
@@ -265,20 +265,14 @@ func BenchmarkHTMLPretty(b *testing.B) {
 				Pre().Text("Hi, there."),
 				Div().Text("Hi, there."),
 				Span().Text("Hi, there."),
-				Span().Text("Hi, there."),
-				Span().Text("Hi, there."),
-				Span().Text("Hi, there."),
-				Span().Text("Hi, there."),
-				Span().Text("Hi, there."),
-				Span().Text("Hi, there."),
-				Span().Text("Hi, there."),
-				Span().Text("Hi, there."),
-				Span().Text("Hi, there."),
-				Span().Text("Hi, there."),
 			),
 		),
 	)
+
+	var r string
 	for n := 0; n < b.N; n++ {
-		root.HTMLPretty()
+		r = root.HTMLPretty()
 	}
+
+	result = r
 }

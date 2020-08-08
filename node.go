@@ -4,11 +4,8 @@ import (
 	"fmt"
 	"html"
 	"io"
-	"regexp"
 	"strings"
 )
-
-var multiWhitespaceRegexp = regexp.MustCompile("\n+")
 
 func newEl() *RawNode {
 	return &RawNode{
@@ -252,8 +249,8 @@ func (e *RawNode) html(level int, prettify bool) string {
 
 	var (
 		attrsStr = e.attrsToString()
-		prefix   = ""
-		suffix   = ""
+		prefix   string
+		suffix   string
 	)
 
 	if e.nodeType == textNode && e.preformatted {
@@ -261,7 +258,7 @@ func (e *RawNode) html(level int, prettify bool) string {
 		innerHTML = e.text
 	} else if e.nodeType == textNode {
 		// Replace multiple whitespace with single space for text nodes
-		innerHTML = multiWhitespaceRegexp.ReplaceAllString(e.text, " ")
+		innerHTML = collapseWhitespace(e.text)
 	} else if e.nodeType == fragmentNode {
 		// No prefix/suffix for fragments
 	} else if e.nodeType == commentNode {

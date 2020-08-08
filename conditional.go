@@ -19,68 +19,68 @@ func Switch(v interface{}) *ifStatement {
 	}
 }
 
-func (lf *ifStatement) Case(v interface{}, n func() Node) *ifStatement {
-	lf.cases[v] = n
-	return lf
+func (c *ifStatement) Case(v interface{}, n func() Node) *ifStatement {
+	c.cases[v] = n
+	return c
 }
 
-func (lf *ifStatement) Default(n func() Node) *ifStatement {
-	lf.defaultCase = n
-	return lf
+func (c *ifStatement) Default(n func() Node) *ifStatement {
+	c.defaultCase = n
+	return c
 }
 
-func (lf *ifStatement) ID(id string) Node {
+func (c *ifStatement) ID(_ string) Node {
 	panic("ID not supported for Switch")
 }
 
-func (lf *ifStatement) Children(child ...Node) Node {
+func (c *ifStatement) Children(_ ...Node) Node {
 	panic("Children not supported for Switch")
 }
 
-func (lf *ifStatement) Range(n int, child func(i int) Node) Node {
+func (c *ifStatement) Range(_ int, _ func(i int) Node) Node {
 	panic("Range not supported for Switch")
 }
 
-func (lf *ifStatement) Text(text string) Node {
+func (c *ifStatement) Text(_ string) Node {
 	panic("Text not supported for Switch")
 }
 
-func (lf *ifStatement) Textf(format string, a ...interface{}) Node {
+func (c *ifStatement) Textf(_ string, _ ...interface{}) Node {
 	panic("Textf not supported for Switch")
 }
 
-func (lf *ifStatement) Attr(name, value string) Node {
+func (c *ifStatement) Attr(_, _ string) Node {
 	panic("Attr not supported for Switch")
 }
 
-func (lf *ifStatement) Class(cls ...string) Node {
+func (c *ifStatement) Class(_ ...string) Node {
 	panic("Class not supported for Switch")
 }
 
-func (lf *ifStatement) Style(name, value string) Node {
+func (c *ifStatement) Style(_, _ string) Node {
 	panic("Style not supported for Switch")
 }
 
-func (lf *ifStatement) HTML() string {
-	return lf.base.HTML()
+func (c *ifStatement) HTML() string {
+	return c.base.HTML()
 }
 
-func (lf *ifStatement) HTMLPretty() string {
-	return lf.base.HTMLPretty()
+func (c *ifStatement) HTMLPretty() string {
+	return c.base.HTMLPretty()
 }
 
-func (lf *ifStatement) Write(w io.Writer) (int, error) {
-	return lf.base.Write(w)
+func (c *ifStatement) Write(w io.Writer) (int, error) {
+	return c.base.Write(w)
 }
 
-func (lf *ifStatement) GetNode() *RawNode {
+func (c *ifStatement) GetNode() *RawNode {
 	var node Node
-	if n, ok := lf.cases[lf.v]; ok {
+	if n, ok := c.cases[c.v]; ok {
 		node = n()
 	}
 
-	if node == nil && lf.defaultCase != nil {
-		node = lf.defaultCase()
+	if node == nil && c.defaultCase != nil {
+		node = c.defaultCase()
 	}
 
 	if node == nil {
