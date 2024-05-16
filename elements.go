@@ -1,5 +1,7 @@
 package hagl
 
+import "strings"
+
 // Elements copied from Elm's HTML package:
 //   https://package.elm-lang.org/packages/elm/html/latest/Html
 
@@ -34,7 +36,7 @@ func Meta() Node {
 }
 
 func Script() Node {
-	return newTagNode("link")
+	return newPreserveWhitespaceTagNode("script")
 }
 
 func Style() Node {
@@ -67,7 +69,7 @@ func H6() Node {
 	return newTagNode("h6")
 }
 
-// Grouping Content
+// Grouping HTML
 
 func Div() Node {
 	return newTagNode("div")
@@ -161,10 +163,18 @@ func Dd() Node {
 	return newTagNode("dd")
 }
 
-// Embedded Content
+// Embedded HTML
 
 func Img() Node {
 	return newSelfClosingTagNode("img")
+}
+
+func Svg() Node {
+	return newTagNode("svg")
+}
+
+func Path() Node {
+	return newTagNode("path")
 }
 
 func IFrame() Node {
@@ -455,12 +465,16 @@ func Menu() Node {
 	return newTagNode("menu")
 }
 
+func Custom(tag string) Node {
+	return newTagNode(tag)
+}
+
 // Special
 
 // Text is special element that renders text
-func Text(text string) Node {
+func Text(text ...string) Node {
 	el := newEl()
-	el.text = text
+	el.text = strings.Join(text, " ")
 	el.nodeType = textNode
 	return el
 }

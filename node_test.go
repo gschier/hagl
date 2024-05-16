@@ -134,6 +134,18 @@ func TestEl(t *testing.T) {
 	})
 }
 
+func TestFragmentEl(t *testing.T) {
+	t.Run("works with no children", func(t *testing.T) {
+		root := Hr().Class("red").Attr("type", "foo")
+		assert.Equal(t, `<hr class="red" type="foo"/>`, root.HTML())
+	})
+
+	t.Run("works with children", func(t *testing.T) {
+		root := Hr().Class("red").Attr("type", "foo").Text("foo")
+		assert.Equal(t, `<hr class="red" type="foo">foo</hr>`, root.HTML())
+	})
+}
+
 func TestSelfClosingEl(t *testing.T) {
 	t.Run("works with no children", func(t *testing.T) {
 		root := Hr().Class("red").Attr("type", "foo")
