@@ -361,12 +361,9 @@ func (rn *RawNode) html(level int, prettify bool) string {
 		suffix   string
 	)
 
-	if rn.nodeType == textNode && rn.preformatted {
+	if rn.nodeType == textNode {
 		// Leave pre-formatted text nodes alone
 		innerHTML = rn.text
-	} else if rn.nodeType == textNode {
-		// Replace multiple whitespace with single space for text nodes
-		innerHTML = collapseWhitespace(rn.text)
 	} else if rn.nodeType == fragmentNode {
 		// No prefix/suffix for fragments
 	} else if rn.nodeType == commentNode {
