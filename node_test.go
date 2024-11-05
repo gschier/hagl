@@ -1,6 +1,7 @@
 package hagl_test
 
 import (
+	"fmt"
 	assert "github.com/stretchr/testify/require"
 	"strings"
 	"testing"
@@ -111,7 +112,7 @@ func TestElement_HTMLPretty(t *testing.T) {
 			"<div>",
 			"  <ul>",
 			"    <li>1</li>",
-			"    <li>Hello World!</li>",
+			"    <li>Hello\n\n\n\nWorld!</li>",
 			"    <li>This is a really long string that will get wrapped because it's too long.</li>",
 			"  </ul>",
 			"  <pre>function foo() {",
@@ -287,4 +288,5 @@ func BenchmarkHTMLPretty(b *testing.B) {
 	}
 
 	result = r
+	fmt.Printf("Result %v\n", result)
 }

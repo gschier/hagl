@@ -49,6 +49,16 @@ func (c *component) Attr(name, value string) Node {
 	return c
 }
 
+func (c *component) AttrIf(cond bool, name, value string) Node {
+	c.base.AttrIf(cond, name, value)
+	return c
+}
+
+func (c *component) AttrBool(name string) Node {
+	c.base.AttrBool(name)
+	return c
+}
+
 func (c *component) Class(cls ...string) Node {
 	c.base.Class(cls...)
 	return c
@@ -66,6 +76,21 @@ func (c *component) Style(name, value string) Node {
 
 func (c *component) Href(value string) Node {
 	c.base.Href(value)
+	return c
+}
+
+func (c *component) Name(value string) Node {
+	c.base.Name(value)
+	return c
+}
+
+func (c *component) Action(value string) Node {
+	c.base.Action(value)
+	return c
+}
+
+func (c *component) Method(value string) Node {
+	c.base.Method(value)
 	return c
 }
 

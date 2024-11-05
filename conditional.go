@@ -4,76 +4,76 @@ import (
 	"io"
 )
 
-type ifStatement struct {
+type SwitchStatement struct {
 	base        *RawNode
 	v           interface{}
 	cases       map[interface{}]func() Node
 	defaultCase func() Node
 }
 
-func Switch(v interface{}) *ifStatement {
-	return &ifStatement{
+func Switch(v interface{}) *SwitchStatement {
+	return &SwitchStatement{
 		base:  Fragment().(*RawNode),
 		cases: make(map[interface{}]func() Node),
 		v:     v,
 	}
 }
 
-func (c *ifStatement) Case(v interface{}, n func() Node) *ifStatement {
+func (c *SwitchStatement) Case(v interface{}, n func() Node) *SwitchStatement {
 	c.cases[v] = n
 	return c
 }
 
-func (c *ifStatement) Default(n func() Node) *ifStatement {
+func (c *SwitchStatement) Default(n func() Node) *SwitchStatement {
 	c.defaultCase = n
 	return c
 }
 
-func (c *ifStatement) ID(_ string) Node {
+func (c *SwitchStatement) ID(_ string) Node {
 	panic("ID not supported for Switch")
 }
 
-func (c *ifStatement) Children(_ ...Node) Node {
+func (c *SwitchStatement) Children(_ ...Node) Node {
 	panic("Children not supported for Switch")
 }
 
-func (c *ifStatement) Range(_ int, _ func(i int) Node) Node {
+func (c *SwitchStatement) Range(_ int, _ func(i int) Node) Node {
 	panic("Range not supported for Switch")
 }
 
-func (c *ifStatement) Text(_ string) Node {
+func (c *SwitchStatement) Text(_ string) Node {
 	panic("Text not supported for Switch")
 }
 
-func (c *ifStatement) Textf(_ string, _ ...interface{}) Node {
+func (c *SwitchStatement) Textf(_ string, _ ...interface{}) Node {
 	panic("Textf not supported for Switch")
 }
 
-func (c *ifStatement) Attr(_, _ string) Node {
+func (c *SwitchStatement) Attr(_, _ string) Node {
 	panic("Attr not supported for Switch")
 }
 
-func (c *ifStatement) Class(_ ...string) Node {
+func (c *SwitchStatement) Class(_ ...string) Node {
 	panic("Class not supported for Switch")
 }
 
-func (c *ifStatement) Style(_, _ string) Node {
+func (c *SwitchStatement) Style(_, _ string) Node {
 	panic("Style not supported for Switch")
 }
 
-func (c *ifStatement) HTML() string {
+func (c *SwitchStatement) HTML() string {
 	return c.base.HTML()
 }
 
-func (c *ifStatement) HTMLPretty() string {
+func (c *SwitchStatement) HTMLPretty() string {
 	return c.base.HTMLPretty()
 }
 
-func (c *ifStatement) Write(w io.Writer) (int, error) {
+func (c *SwitchStatement) Write(w io.Writer) (int, error) {
 	return c.base.Write(w)
 }
 
-func (c *ifStatement) GetNode() *RawNode {
+func (c *SwitchStatement) GetNode() *RawNode {
 	var node Node
 	if n, ok := c.cases[c.v]; ok {
 		node = n()

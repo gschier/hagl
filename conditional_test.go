@@ -13,7 +13,8 @@ func TestSwitch(t *testing.T) {
 			Switch("foo").
 				Case("bar", func() Node { return Text("bar") }).
 				Case("baz", func() Node { return Text("baz") }).
-				Default(func() Node { return Text("default") }),
+				Default(func() Node { return Text("default") }).
+				GetNode(),
 		)
 		assert.Equal(t, "<div>default</div>", r.HTML())
 	})
@@ -23,7 +24,8 @@ func TestSwitch(t *testing.T) {
 			Switch("baz").
 				Case("bar", func() Node { return Text("bar") }).
 				Case("baz", func() Node { return Text("baz") }).
-				Default(func() Node { return Text("default") }),
+				Default(func() Node { return Text("default") }).
+				GetNode(),
 		)
 		assert.Equal(t, "<div>baz</div>", r.HTML())
 	})
@@ -32,7 +34,8 @@ func TestSwitch(t *testing.T) {
 		r := Div().Children(
 			Switch("foo").
 				Case("bar", func() Node { return Text("bar") }).
-				Case("baz", func() Node { return Text("baz") }),
+				Case("baz", func() Node { return Text("baz") }).
+				GetNode(),
 		)
 		assert.Equal(t, "<div></div>", r.HTML())
 	})
