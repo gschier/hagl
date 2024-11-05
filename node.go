@@ -54,7 +54,9 @@ type Node interface {
 	Range(n int, child func(i int) Node) Node
 	Text(text ...string) Node
 	Textf(format string, a ...interface{}) Node
+	AttrBool(name string) Node
 	Attr(name, value string) Node
+	AttrIf(cond bool, name, value string) Node
 	Class(cls ...string) Node
 	ClassIf(condition bool, cls string) Node
 	Style(name, value string) Node
@@ -73,6 +75,9 @@ type Node interface {
 	Rel(value string) Node
 	Src(value string) Node
 	Target(value string) Node
+	Name(value string) Node
+	Action(value string) Node
+	Method(value string) Node
 	Alt(value string) Node
 	Type(value string) Node
 	Title(value string) Node
@@ -149,6 +154,18 @@ func (rn *RawNode) Type(value string) Node {
 
 func (rn *RawNode) Title(value string) Node {
 	return rn.Attr("title", value)
+}
+
+func (rn *RawNode) Name(value string) Node {
+	return rn.Attr("name", value)
+}
+
+func (rn *RawNode) Action(value string) Node {
+	return rn.Attr("action", value)
+}
+
+func (rn *RawNode) Method(value string) Node {
+	return rn.Attr("method", value)
 }
 
 func (rn *RawNode) GetNode() *RawNode {
@@ -238,6 +255,18 @@ func (rn *RawNode) Attr(name, value string) Node {
 	rn.attrs = append(rn.attrs, attr{name: name, value: value})
 
 	return rn
+}
+
+func (rn *RawNode) AttrIf(cond bool, name, value string) Node {
+	if cond {
+		return rn.Attr(name, value)
+	} else {
+		return rn
+	}
+}
+
+func (rn *RawNode) AttrBool(name string) Node {
+	return rn.Attr(name, name)
 }
 
 func (rn *RawNode) Class(cls ...string) Node {
