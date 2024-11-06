@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"html"
 	"io"
+	"regexp"
+	"slices"
 	"strings"
 )
 
@@ -60,8 +62,9 @@ type Node interface {
 	Class(cls ...string) Node
 	ClassIf(condition bool, cls string) Node
 	Style(name, value string) Node
-	HTML() string
-	HTMLPretty() string
+	ToHTML() string
+	ToHTMLPretty() string
+	ToText() string
 	Write(w io.Writer) (int, error)
 	WritePretty(w io.Writer) (int, error)
 	MustWrite(w io.Writer)
@@ -314,31 +317,35 @@ func (rn *RawNode) Style(name, value string) Node {
 	return rn
 }
 
-func (rn *RawNode) HTML() string {
-	return rn.html(-1, false)
+func (rn *RawNode) ToText() string {
+	return rn.toText(-1)
 }
 
-func (rn *RawNode) HTMLPretty() string {
-	return strings.TrimSpace(rn.html(0, true))
+func (rn *RawNode) ToHTML() string {
+	return rn.toHTML(-1, false)
+}
+
+func (rn *RawNode) ToHTMLPretty() string {
+	return strings.TrimSpace(rn.toHTML(0, true))
 }
 
 func (rn *RawNode) Write(w io.Writer) (int, error) {
-	return w.Write([]byte(rn.HTML()))
+	return w.Write([]byte(rn.ToHTML()))
 }
 
 func (rn *RawNode) MustWrite(w io.Writer) {
-	_, err := w.Write([]byte(rn.HTML()))
+	_, err := w.Write([]byte(rn.ToHTML()))
 	if err != nil {
 		panic(err)
 	}
 }
 
 func (rn *RawNode) WritePretty(w io.Writer) (int, error) {
-	return w.Write([]byte(rn.HTMLPretty()))
+	return w.Write([]byte(rn.ToHTMLPretty()))
 }
 
 func (rn *RawNode) MustWritePretty(w io.Writer) {
-	_, err := w.Write([]byte(rn.HTMLPretty()))
+	_, err := w.Write([]byte(rn.ToHTMLPretty()))
 	if err != nil {
 		panic(err)
 	}
@@ -354,7 +361,57 @@ func (rn *RawNode) indent(level int, text string) string {
 	return prefix.String()
 }
 
-func (rn *RawNode) html(level int, prettify bool) string {
+func (rn *RawNode) toText(level int) string {
+	// Nothing to do for hidden nodes
+	if rn.hide {
+		return ""
+	}
+
+	if rn.nodeType == textNode {
+		return WrapText(rn.text, 80)
+	}
+
+	innerText := ""
+
+	if rn.isBlock() && rn.tag != "li" {
+		innerText = "\n"
+	}
+
+	// Render children if the element has them
+	for i, c := range rn.children {
+		if c.GetNode().tag == "li" {
+			if rn.tag == "ol" {
+				innerText += fmt.Sprintf(" %d) ", i+1)
+			} else if rn.tag == "ul" {
+				innerText += fmt.Sprintf(" - ")
+			}
+		}
+
+		if rn.preformatted {
+			innerText += c.GetNode().toText(0)
+		} else {
+			innerText += c.GetNode().toText(level + rn.indentIncrement)
+		}
+	}
+
+	if rn.tag == "a" {
+		innerText += fmt.Sprintf(" (%s)", rn.attr("href"))
+	}
+
+	if rn.isBlock() {
+		innerText += "\n"
+	}
+
+	// Trim space if it's the root element, and remove double empty lines
+	if level == -1 {
+		innerText = strings.TrimSpace(innerText)
+		innerText = regexp.MustCompile(`\n{3,}`).ReplaceAllString(innerText, "\n\n")
+	}
+
+	return innerText
+}
+
+func (rn *RawNode) toHTML(level int, prettify bool) string {
 	// Nothing to do for hidden nodes
 	if rn.hide {
 		return ""
@@ -372,9 +429,9 @@ func (rn *RawNode) html(level int, prettify bool) string {
 		if rn.preformatted {
 			// Indent open tag but nothing else
 			// TODO: Figure out what to do with tags inside <pre>
-			innerHTML += rn.indent(0, c.GetNode().html(0, false))
+			innerHTML += rn.indent(0, c.GetNode().toHTML(0, false))
 		} else {
-			innerHTML += c.GetNode().html(level+rn.indentIncrement, prettify)
+			innerHTML += c.GetNode().toHTML(level+rn.indentIncrement, prettify)
 		}
 
 		// Add newline after each child if we're prettifying. Note, we don't
@@ -391,7 +448,7 @@ func (rn *RawNode) html(level int, prettify bool) string {
 	)
 
 	if rn.nodeType == textNode {
-		// Leave pre-formatted text nodes alone
+		// Text nodes are just text
 		innerHTML = rn.text
 	} else if rn.nodeType == fragmentNode {
 		// No prefix/suffix for fragments
@@ -445,4 +502,37 @@ func (rn *RawNode) attr(name string) string {
 		}
 	}
 	return ""
+}
+
+func (rn *RawNode) isBlock() bool {
+	var blockEls = []string{
+		"address",
+		"article",
+		"aside",
+		"blockquote",
+		"div",
+		"dl",
+		"fieldset",
+		"figure",
+		"footer",
+		"form",
+		"h1",
+		"h2",
+		"h3",
+		"h4",
+		"h5",
+		"h6",
+		"header",
+		"hr",
+		"li",
+		"main",
+		"nav",
+		"ol",
+		"p",
+		"pre",
+		"section",
+		"table",
+		"ul",
+	}
+	return slices.Contains(blockEls, rn.tag)
 }

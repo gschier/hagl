@@ -62,11 +62,11 @@ func (c *SwitchStatement) Style(_, _ string) Node {
 }
 
 func (c *SwitchStatement) HTML() string {
-	return c.base.HTML()
+	return c.base.ToHTML()
 }
 
 func (c *SwitchStatement) HTMLPretty() string {
-	return c.base.HTMLPretty()
+	return c.base.ToHTMLPretty()
 }
 
 func (c *SwitchStatement) Write(w io.Writer) (int, error) {

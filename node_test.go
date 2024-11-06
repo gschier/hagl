@@ -9,10 +9,10 @@ import (
 	. "github.com/gschier/hagl"
 )
 
-func TestElement_HTML(t *testing.T) {
+func TestElement_ToHTML(t *testing.T) {
 	t.Run("generates simple element", func(t *testing.T) {
 		root := Div().Text("Hello World!")
-		assert.Equal(t, "<div>Hello World!</div>", root.HTML())
+		assert.Equal(t, "<div>Hello World!</div>", root.ToHTML())
 	})
 
 	t.Run("generates nested elements", func(t *testing.T) {
@@ -33,53 +33,112 @@ func TestElement_HTML(t *testing.T) {
 			"  </ul>",
 			"  <button class=\"btn\">Click Me!</button>",
 			"</div>",
-		}, "\n"), root.HTMLPretty())
+		}, "\n"), root.ToHTMLPretty())
+	})
+}
+
+func TestElement_ToText(t *testing.T) {
+	t.Run("generates simple element", func(t *testing.T) {
+		root := Div().Text("Hello World!")
+		assert.Equal(t, "Hello World!", root.ToText())
+	})
+
+	t.Run("generates nested elements", func(t *testing.T) {
+		root := Div().Children(
+			H1().Text("Hello World!"),
+			Ul().Children(
+				Li().Text("Item 1"),
+				Li().Text("Item 2"),
+			),
+			Ol().Children(
+				Li().Text("Item 1"),
+				Li().Text("Item 2"),
+			),
+			P().Text(
+				"This is a paragraph.",
+				"It is very long so that the text will be wrapped onto a newline.",
+				"Did it work?",
+			),
+			P().Children(
+				A().Href("https://yaak.app").Class("btn").Text("Click Me!"),
+			),
+		)
+		assert.Equal(t, strings.Join([]string{
+			"Hello World!",
+			"",
+			" - Item 1",
+			" - Item 2",
+			"",
+			" 1) Item 1",
+			" 2) Item 2",
+			"",
+			"This is a paragraph. It is very long so that the text will be wrapped onto a ",
+			"newline. Did it work?",
+			"",
+			"Click Me! (https://yaak.app)",
+		}, "\n"), root.ToText())
+	})
+
+	t.Run("doesn't add too much whitespace", func(t *testing.T) {
+		root := Div().Children(
+			Div().Children(
+				Div().Children(
+					P().Text("P 1"),
+					P().Text("P 2"),
+				),
+			),
+		)
+		assert.Equal(t, strings.Join([]string{
+			"P 1",
+			"",
+			"P 2",
+		}, "\n"), root.ToText())
 	})
 }
 
 func TestElement_Attr(t *testing.T) {
 	t.Run("adds attr", func(t *testing.T) {
 		root := Div().Attr("style", "display: block")
-		assert.Equal(t, `<div style="display: block"></div>`, root.HTML())
+		assert.Equal(t, `<div style="display: block"></div>`, root.ToHTML())
 	})
 
 	t.Run("overwrites attribute", func(t *testing.T) {
 		root := Div().Attr("id", "1").Attr("id", "2")
-		assert.Equal(t, `<div id="2"></div>`, root.HTML())
+		assert.Equal(t, `<div id="2"></div>`, root.ToHTML())
 	})
 }
 
 func TestElement_Class(t *testing.T) {
 	t.Run("adds classes", func(t *testing.T) {
 		root := Button().Class("btn", "btn--primary")
-		assert.Equal(t, `<button class="btn btn--primary"></button>`, root.HTML())
+		assert.Equal(t, `<button class="btn btn--primary"></button>`, root.ToHTML())
 	})
 
 	t.Run("adds duplicate classes", func(t *testing.T) {
 		root := Div().Class("btn", "btn--primary", "btn")
-		assert.Equal(t, `<div class="btn btn--primary"></div>`, root.HTML())
+		assert.Equal(t, `<div class="btn btn--primary"></div>`, root.ToHTML())
 	})
 
 	t.Run("appends to manually set attr", func(t *testing.T) {
 		root := Button().Attr("class", "btn").Class("btn--primary")
-		assert.Equal(t, `<button class="btn btn--primary"></button>`, root.HTML())
+		assert.Equal(t, `<button class="btn btn--primary"></button>`, root.ToHTML())
 	})
 }
 
 func TestElement_Style(t *testing.T) {
 	t.Run("adds style", func(t *testing.T) {
 		root := Button().Style("background", "red")
-		assert.Equal(t, `<button style="background:red"></button>`, root.HTML())
+		assert.Equal(t, `<button style="background:red"></button>`, root.ToHTML())
 	})
 
 	t.Run("adds multiple styles", func(t *testing.T) {
 		root := Button().Style("background", "red").Style("color", "white")
-		assert.Equal(t, `<button style="background:red;color:white"></button>`, root.HTML())
+		assert.Equal(t, `<button style="background:red;color:white"></button>`, root.ToHTML())
 	})
 
 	t.Run("doesn't overwrite style", func(t *testing.T) {
 		root := Button().Style("background", "red").Style("background", "blue")
-		assert.Equal(t, `<button style="background:red;background:blue"></button>`, root.HTML())
+		assert.Equal(t, `<button style="background:red;background:blue"></button>`, root.ToHTML())
 	})
 }
 
@@ -90,7 +149,7 @@ func TestElement_HTMLPretty(t *testing.T) {
 			"<pre>function foo() {",
 			"  return 'Hello World!';",
 			"}</pre>",
-		}, "\n"), root.HTMLPretty())
+		}, "\n"), root.ToHTMLPretty())
 	})
 
 	t.Run("pretty HTML", func(t *testing.T) {
@@ -120,7 +179,7 @@ func TestElement_HTMLPretty(t *testing.T) {
 			"}</pre>",
 			"  <pre><div>foo</div>Bar<h2>woo!</h2><!-- That was cool --></pre>",
 			"</div>",
-		}, "\n"), root.HTMLPretty())
+		}, "\n"), root.ToHTMLPretty())
 	})
 }
 
@@ -131,38 +190,38 @@ func TestEl(t *testing.T) {
 		}
 
 		root := Div().Children(Btn().Text("Click Me!"))
-		assert.Equal(t, `<div><button class="btn btn--primary" type="button">Click Me!</button></div>`, root.HTML())
+		assert.Equal(t, `<div><button class="btn btn--primary" type="button">Click Me!</button></div>`, root.ToHTML())
 	})
 }
 
 func TestFragmentEl(t *testing.T) {
 	t.Run("works with no children", func(t *testing.T) {
 		root := Hr().Class("red").Attr("type", "foo")
-		assert.Equal(t, `<hr class="red" type="foo"/>`, root.HTML())
+		assert.Equal(t, `<hr class="red" type="foo"/>`, root.ToHTML())
 	})
 
 	t.Run("works with children", func(t *testing.T) {
 		root := Hr().Class("red").Attr("type", "foo").Text("foo")
-		assert.Equal(t, `<hr class="red" type="foo">foo</hr>`, root.HTML())
+		assert.Equal(t, `<hr class="red" type="foo">foo</hr>`, root.ToHTML())
 	})
 }
 
 func TestSelfClosingEl(t *testing.T) {
 	t.Run("works with no children", func(t *testing.T) {
 		root := Hr().Class("red").Attr("type", "foo")
-		assert.Equal(t, `<hr class="red" type="foo"/>`, root.HTML())
+		assert.Equal(t, `<hr class="red" type="foo"/>`, root.ToHTML())
 	})
 
 	t.Run("works with children", func(t *testing.T) {
 		root := Hr().Class("red").Attr("type", "foo").Text("foo")
-		assert.Equal(t, `<hr class="red" type="foo">foo</hr>`, root.HTML())
+		assert.Equal(t, `<hr class="red" type="foo">foo</hr>`, root.ToHTML())
 	})
 }
 
 func TestComment(t *testing.T) {
 	t.Run("basic example", func(t *testing.T) {
 		root := Comment("This is a comment")
-		assert.Equal(t, "<!-- This is a comment -->", root.HTML())
+		assert.Equal(t, "<!-- This is a comment -->", root.ToHTML())
 	})
 
 	t.Run("complex example", func(t *testing.T) {
@@ -179,7 +238,7 @@ func TestComment(t *testing.T) {
 			"    <!-- This is an awesome comment -->",
 			"  </div>",
 			"</div>",
-		}, "\n"), root.HTMLPretty())
+		}, "\n"), root.ToHTMLPretty())
 	})
 }
 
@@ -190,7 +249,7 @@ func TestFragment(t *testing.T) {
 			Div(),
 			Div(),
 		)
-		assert.Equal(t, "<div><span>foo</span></div><div></div><div></div>", root.HTML())
+		assert.Equal(t, "<div><span>foo</span></div><div></div><div></div>", root.ToHTML())
 	})
 
 	t.Run("basic example wrapped", func(t *testing.T) {
@@ -201,7 +260,7 @@ func TestFragment(t *testing.T) {
 				Div(),
 			),
 		)
-		assert.Equal(t, "<div><div><span>foo</span></div><div></div><div></div></div>", root.HTML())
+		assert.Equal(t, "<div><div><span>foo</span></div><div></div><div></div></div>", root.ToHTML())
 	})
 
 	t.Run("pretty basic example", func(t *testing.T) {
@@ -216,7 +275,7 @@ func TestFragment(t *testing.T) {
 			"</div>",
 			"<div></div>",
 			"<div></div>",
-		}, "\n"), root.HTMLPretty())
+		}, "\n"), root.ToHTMLPretty())
 	})
 
 	t.Run("pretty basic example wrapped", func(t *testing.T) {
@@ -239,7 +298,7 @@ func TestFragment(t *testing.T) {
 			"  <h1>Hi</h1>",
 			"  <h2></h2>",
 			"</div>",
-		}, "\n"), root.HTMLPretty())
+		}, "\n"), root.ToHTMLPretty())
 	})
 }
 
@@ -253,7 +312,7 @@ func TestElement_Map(t *testing.T) {
 			return Li().Text(items[i])
 		})
 
-		assert.Equal(t, `<ul><li>foo</li><li>baz</li></ul>`, root.HTML())
+		assert.Equal(t, `<ul><li>foo</li><li>baz</li></ul>`, root.ToHTML())
 	})
 }
 
@@ -284,7 +343,7 @@ func BenchmarkHTMLPretty(b *testing.B) {
 
 	var r string
 	for n := 0; n < b.N; n++ {
-		r = root.HTMLPretty()
+		r = root.ToHTMLPretty()
 	}
 
 	result = r

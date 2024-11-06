@@ -16,7 +16,7 @@ func TestSwitch(t *testing.T) {
 				Default(func() Node { return Text("default") }).
 				GetNode(),
 		)
-		assert.Equal(t, "<div>default</div>", r.HTML())
+		assert.Equal(t, "<div>default</div>", r.ToHTML())
 	})
 
 	t.Run("matches case", func(t *testing.T) {
@@ -27,7 +27,7 @@ func TestSwitch(t *testing.T) {
 				Default(func() Node { return Text("default") }).
 				GetNode(),
 		)
-		assert.Equal(t, "<div>baz</div>", r.HTML())
+		assert.Equal(t, "<div>baz</div>", r.ToHTML())
 	})
 
 	t.Run("matches default but no default set", func(t *testing.T) {
@@ -37,6 +37,6 @@ func TestSwitch(t *testing.T) {
 				Case("baz", func() Node { return Text("baz") }).
 				GetNode(),
 		)
-		assert.Equal(t, "<div></div>", r.HTML())
+		assert.Equal(t, "<div></div>", r.ToHTML())
 	})
 }

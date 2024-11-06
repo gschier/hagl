@@ -147,12 +147,16 @@ func (c *component) merge() Node {
 	return n
 }
 
-func (c *component) HTML() string {
-	return c.merge().HTML()
+func (c *component) ToHTML() string {
+	return c.merge().ToHTML()
 }
 
-func (c *component) HTMLPretty() string {
-	return c.merge().HTMLPretty()
+func (c *component) ToText() string {
+	return c.merge().ToText()
+}
+
+func (c *component) ToHTMLPretty() string {
+	return c.merge().ToHTMLPretty()
 }
 
 func (c *component) Write(w io.Writer) (int, error) {

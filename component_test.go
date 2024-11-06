@@ -17,7 +17,7 @@ func TestComponent(t *testing.T) {
 			H1().Class("h1-class").Text("Hello"),
 		)
 
-		assert.Equal(t, `<main class="layout added" layout="xxx" added="yyy"><h1 class="h1-class">Hello</h1></main>`, El.HTML())
+		assert.Equal(t, `<main class="layout added" layout="xxx" added="yyy"><h1 class="h1-class">Hello</h1></main>`, El.ToHTML())
 	})
 
 	t.Run("component works", func(t *testing.T) {
@@ -31,6 +31,6 @@ func TestComponent(t *testing.T) {
 
 		assert.Equal(t, `<div class="layout"><h1 class="h1">Home</h1></div>`, Layout().Children(
 			Heading().Text("Home"),
-		).HTML())
+		).ToHTML())
 	})
 }
