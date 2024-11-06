@@ -127,17 +127,17 @@ func TestElement_Class(t *testing.T) {
 
 func TestElement_Style(t *testing.T) {
 	t.Run("adds style", func(t *testing.T) {
-		root := Button().Style("background", "red")
+		root := Button().StyleProperty("background", "red")
 		assert.Equal(t, `<button style="background:red"></button>`, root.ToHTML())
 	})
 
 	t.Run("adds multiple styles", func(t *testing.T) {
-		root := Button().Style("background", "red").Style("color", "white")
+		root := Button().StyleProperty("background", "red").StyleProperty("color", "white")
 		assert.Equal(t, `<button style="background:red;color:white"></button>`, root.ToHTML())
 	})
 
 	t.Run("doesn't overwrite style", func(t *testing.T) {
-		root := Button().Style("background", "red").Style("background", "blue")
+		root := Button().StyleProperty("background", "red").StyleProperty("background", "blue")
 		assert.Equal(t, `<button style="background:red;background:blue"></button>`, root.ToHTML())
 	})
 }

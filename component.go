@@ -69,8 +69,13 @@ func (c *component) ClassIf(condition bool, cls string) Node {
 	return c
 }
 
-func (c *component) Style(name, value string) Node {
-	c.base.Style(name, value)
+func (c *component) Style(value string) Node {
+	c.base.Style(value)
+	return c
+}
+
+func (c *component) StyleProperty(name, value string) Node {
+	c.base.StyleProperty(name, value)
 	return c
 }
 

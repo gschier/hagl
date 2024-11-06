@@ -61,7 +61,8 @@ type Node interface {
 	AttrIf(cond bool, name, value string) Node
 	Class(cls ...string) Node
 	ClassIf(condition bool, cls string) Node
-	Style(name, value string) Node
+	StyleProperty(name, value string) Node
+	Style(value string) Node
 	ToHTML() string
 	ToHTMLPretty() string
 	ToText() string
@@ -301,9 +302,14 @@ func (rn *RawNode) ClassIf(condition bool, cls string) Node {
 	return rn.Class(cls)
 }
 
-// Style is a utility method to append to the style attribute. If a style
+func (rn *RawNode) Style(value string) Node {
+	rn.Attr("style", value)
+	return rn
+}
+
+// StyleProperty is a utility method to append to the style attribute. If a style
 // attribute already exists, the new style will be appended.
-func (rn *RawNode) Style(name, value string) Node {
+func (rn *RawNode) StyleProperty(name, value string) Node {
 	str := name + ":" + value
 	for i, a := range rn.attrs {
 		if a.name == "style" {
