@@ -110,7 +110,7 @@ func Em() Node {
 }
 
 func Strong() Node {
-	return newTagNode("em")
+	return newTagNode("strong")
 }
 
 func I() Node {
