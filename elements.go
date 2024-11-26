@@ -1,6 +1,9 @@
 package hagl
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 // Elements copied from Elm's HTML package:
 //   https://package.elm-lang.org/packages/elm/html/latest/Html
@@ -477,6 +480,11 @@ func Text(text ...string) Node {
 	el.text = strings.Join(text, " ")
 	el.nodeType = textNode
 	return el
+}
+
+// Textf is special element that renders formatted text
+func Textf(text string, a ...interface{}) Node {
+	return Text(fmt.Sprintf(text, a...))
 }
 
 // Fragment is a special element that renders children without needing

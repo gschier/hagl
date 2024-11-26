@@ -114,6 +114,11 @@ func (c *component) Target(value string) Node {
 	return c
 }
 
+func (c *component) Value(value string) Node {
+	c.base.Value(value)
+	return c
+}
+
 func (c *component) Alt(value string) Node {
 	c.base.Alt(value)
 	return c

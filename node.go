@@ -63,6 +63,7 @@ type Node interface {
 	ClassIf(condition bool, cls string) Node
 	StyleProperty(name, value string) Node
 	Style(value string) Node
+	Value(value string) Node
 	ToHTML() string
 	ToHTMLPretty() string
 	ToText() string
@@ -154,6 +155,10 @@ func (rn *RawNode) Alt(value string) Node {
 
 func (rn *RawNode) Type(value string) Node {
 	return rn.Attr("type", value)
+}
+
+func (rn *RawNode) Value(value string) Node {
+	return rn.Attr("value", value)
 }
 
 func (rn *RawNode) Title(value string) Node {
