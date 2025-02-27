@@ -203,7 +203,7 @@ func Input() Node {
 }
 
 func Textarea() Node {
-	return newSelfClosingTagNode("textarea")
+	return newTagNode("textarea")
 }
 
 func Button() Node {
