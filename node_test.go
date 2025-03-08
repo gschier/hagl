@@ -15,6 +15,16 @@ func TestElement_ToHTML(t *testing.T) {
 		assert.Equal(t, "<div>Hello World!</div>", root.ToHTML())
 	})
 
+	t.Run("escapes text content", func(t *testing.T) {
+		root := Div().Text(`Hello "<World>"`)
+		assert.Equal(t, `<div>Hello &#34;&lt;World&gt;&#34;</div>`, root.ToHTML())
+	})
+
+	t.Run("leaves raw text content", func(t *testing.T) {
+		root := Div().HTMLUnsafe(`Hello <strong>World</strong>`)
+		assert.Equal(t, `<div>Hello <strong>World</strong></div>`, root.ToHTML())
+	})
+
 	t.Run("generates nested elements", func(t *testing.T) {
 		root := Div().Children(
 			H1().Text("Hello World!"),
@@ -102,9 +112,14 @@ func TestElement_Attr(t *testing.T) {
 		assert.Equal(t, `<div style="display: block"></div>`, root.ToHTML())
 	})
 
-	t.Run("overwrites attribute", func(t *testing.T) {
+	t.Run("overwrites attr", func(t *testing.T) {
 		root := Div().Attr("id", "1").Attr("id", "2")
 		assert.Equal(t, `<div id="2"></div>`, root.ToHTML())
+	})
+
+	t.Run("escapes attr", func(t *testing.T) {
+		root := Div().Attr(`"style <Hello-WORLD>"`, `Hello <string>"World"</strong>"`)
+		assert.Equal(t, `<div styleHello-WORLD="Hello &lt;string&gt;&#34;World&#34;&lt;/strong&gt;&#34;"></div>`, root.ToHTML())
 	})
 }
 
@@ -144,7 +159,7 @@ func TestElement_Style(t *testing.T) {
 
 func TestElement_HTMLPretty(t *testing.T) {
 	t.Run("pre", func(t *testing.T) {
-		root := Pre().Text("function foo() {\n  return 'Hello World!';\n}")
+		root := Pre().HTMLUnsafe("function foo() {\n  return 'Hello World!';\n}")
 		assert.Equal(t, strings.Join([]string{
 			"<pre>function foo() {",
 			"  return 'Hello World!';",
@@ -172,10 +187,10 @@ func TestElement_HTMLPretty(t *testing.T) {
 			"  <ul>",
 			"    <li>1</li>",
 			"    <li>Hello\n\n\n\nWorld!</li>",
-			"    <li>This is a really long string that will get wrapped because it's too long.</li>",
+			"    <li>This is a really long string that will get wrapped because it&#39;s too long.</li>",
 			"  </ul>",
 			"  <pre>function foo() {",
-			"  return 'Hello World!';",
+			"  return &#39;Hello World!&#39;;",
 			"}</pre>",
 			"  <pre><div>foo</div>Bar<h2>woo!</h2><!-- That was cool --></pre>",
 			"</div>",

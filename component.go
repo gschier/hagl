@@ -44,6 +44,11 @@ func (c *component) Textf(format string, a ...interface{}) Node {
 	return c
 }
 
+func (c *component) HTMLUnsafe(html string) Node {
+	c.base.HTMLUnsafe(html)
+	return c
+}
+
 func (c *component) Attr(name, value string) Node {
 	c.base.Attr(name, value)
 	return c

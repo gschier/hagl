@@ -2,6 +2,7 @@ package hagl
 
 import (
 	"fmt"
+	"html"
 	"strings"
 )
 
@@ -477,7 +478,11 @@ func Custom(tag string) Node {
 // Text is special element that renders text
 func Text(text ...string) Node {
 	el := newEl()
-	el.text = strings.Join(text, " ")
+	escaped := make([]string, len(text))
+	for i, t := range text {
+		escaped[i] = html.EscapeString(t)
+	}
+	el.text = strings.Join(escaped, " ")
 	el.nodeType = textNode
 	return el
 }
@@ -485,6 +490,14 @@ func Text(text ...string) Node {
 // Textf is special element that renders formatted text
 func Textf(text string, a ...interface{}) Node {
 	return Text(fmt.Sprintf(text, a...))
+}
+
+// UnsafeText is special element that renders raw text or HTML (unescaped)
+func UnsafeText(text ...string) Node {
+	el := newEl()
+	el.text = strings.Join(text, " ")
+	el.nodeType = textNode
+	return el
 }
 
 // Fragment is a special element that renders children without needing

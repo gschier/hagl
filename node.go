@@ -56,6 +56,7 @@ type Node interface {
 	Range(n int, child func(i int) Node) Node
 	Text(text ...string) Node
 	Textf(format string, a ...interface{}) Node
+	HTMLUnsafe(html string) Node
 	AttrBool(name string) Node
 	Attr(name, value string) Node
 	AttrIf(cond bool, name, value string) Node
@@ -251,6 +252,11 @@ func (rn *RawNode) Text(text ...string) Node {
 // Textf is the same as Text, but accepts fmt args
 func (rn *RawNode) Textf(format string, a ...interface{}) Node {
 	return rn.Children(Text(fmt.Sprintf(format, a...)))
+}
+
+// HTMLUnsafe sets the inner HTML of the node as-is. This will not be escaped!
+func (rn *RawNode) HTMLUnsafe(html string) Node {
+	return rn.Children(UnsafeText(html))
 }
 
 func (rn *RawNode) Attr(name, value string) Node {
@@ -496,11 +502,10 @@ func (rn *RawNode) toHTML(level int, prettify bool) string {
 func (rn *RawNode) attrsToString() string {
 	items := strings.Builder{}
 	for _, a := range rn.attrs {
-		escaped := html.EscapeString(a.value)
 		items.WriteString(" ")
-		items.WriteString(a.name)
+		items.WriteString(sanitizeAttrName(a.name))
 		items.WriteString("=\"")
-		items.WriteString(escaped)
+		items.WriteString(html.EscapeString(a.value))
 		items.WriteString("\"")
 	}
 	return items.String()
