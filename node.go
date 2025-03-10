@@ -216,8 +216,13 @@ func (rn *RawNode) Extend(node Node) Node {
 	for _, attr := range n.attrs {
 		found := false
 		for i, existingAttr := range rn.attrs {
-			if existingAttr.name == attr.name && existingAttr.name == "class" {
-				rn.attrs[i].value = existingAttr.value + " " + attr.value
+			if existingAttr.name == attr.name {
+				if existingAttr.name == "class" { // Append to class
+					rn.attrs[i].value = existingAttr.value + " " + attr.value
+				} else { // Overwrite all others
+					rn.attrs[i].value = attr.value
+				}
+
 				found = true
 				break
 			}
