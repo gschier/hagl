@@ -21,7 +21,8 @@ func NewComponent(render func(children []Node) Node) func() Node {
 }
 
 func (c *component) ID(id string) Node {
-	return c.base.ID(id)
+	c.base.ID(id)
+	return c
 }
 
 func (c *component) Children(child ...Node) Node {

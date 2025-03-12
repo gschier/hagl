@@ -19,6 +19,14 @@ func TestComponent(t *testing.T) {
 		assert.Equal(t, `<main class="layout added" layout="xxx" added="yyy"><h1 class="h1-class">Hello</h1></main>`, El.ToHTML())
 	})
 
+	t.Run("component with ID", func(t *testing.T) {
+		c := NewComponent(func(children []Node) Node {
+			return Input().Type("text")
+		})
+
+		assert.Equal(t, `<input type="text" id="my-id"/>`, c().Attr("id", "my-id").ToHTML())
+	})
+
 	t.Run("multiple components", func(t *testing.T) {
 		Layout := NewComponent(func(children []Node) Node {
 			return Div().Class("layout").Children(children...)
